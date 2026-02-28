@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
 import { feedbackService } from "../../services/feedback.service";
 import { toISODate } from "../../utils/formatDate";
-import Input from "../../components/common/Input";
-import { Star } from "lucide-react";
+import { Star, TrendingUp, MessageCircle, BarChart3, Calendar } from "lucide-react";
 
 const FeedbackSummary = () => {
   const [startDate, setStartDate] = useState(
@@ -55,30 +55,63 @@ const FeedbackSummary = () => {
   return (
     <ModernLayout>
       <div>
-        <h1 className="text-3xl font-bold mb-6">Feedback Summary</h1>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 mb-6 text-white shadow-xl"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <BarChart3 className="w-10 h-10" />
+            <h1 className="text-4xl font-bold">Feedback Summary</h1>
+          </div>
+          <p className="text-white/90 text-lg">
+            Analyze student feedback and improve meal quality
+          </p>
+        </motion.div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Input
-              type="date"
-              label="Start Date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <Input
-              type="date"
-              label="End Date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-lg p-6 mb-6"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-5 h-5 text-violet-600" />
+            <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Start Date
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                End Date
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Meal Type
               </label>
               <select
                 value={mealType}
                 onChange={(e) => setMealType(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
               >
                 <option value="">All Meals</option>
                 <option value="breakfast">Breakfast</option>
@@ -87,102 +120,164 @@ const FeedbackSummary = () => {
               </select>
             </div>
           </div>
+        </motion.div>
 
-          {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : !summary ? (
-            <div className="text-center py-8 text-gray-600">
-              No feedback data available
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : !summary ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white rounded-2xl shadow-lg p-12 text-center"
+          >
+            <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 text-lg">No feedback data available</p>
+          </motion.div>
+        ) : (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-blue-100">Total Feedback</p>
+                  <MessageCircle className="w-8 h-8 text-blue-200" />
+                </div>
+                <p className="text-4xl font-bold">{summary.totalFeedback || 0}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.25 }}
+                className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-yellow-100">Average Rating</p>
+                  <Star className="w-8 h-8 text-yellow-200 fill-yellow-200" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <p className="text-4xl font-bold">
+                    {summary.averageRating?.toFixed(1) || 0}
+                  </p>
+                  {renderStars(Math.round(summary.averageRating || 0))}
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-green-100">Positive Feedback</p>
+                  <TrendingUp className="w-8 h-8 text-green-200" />
+                </div>
+                <p className="text-4xl font-bold">
+                  {(summary.ratingDistribution?.[5] || 0) +
+                    (summary.ratingDistribution?.[4] || 0)}
+                </p>
+              </motion.div>
             </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Total Feedback</p>
-                  <p className="text-2xl font-bold">
-                    {summary.totalFeedback || 0}
-                  </p>
-                </div>
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Average Rating</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-2xl font-bold">
-                      {summary.averageRating?.toFixed(1) || 0}
-                    </p>
-                    {renderStars(Math.round(summary.averageRating || 0))}
-                  </div>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Positive Feedback</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {summary.ratingDistribution?.[5] +
-                      summary.ratingDistribution?.[4] || 0}
-                  </p>
-                </div>
-              </div>
 
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">
-                  Rating Distribution
-                </h3>
-                <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => {
-                    const count = summary.ratingDistribution?.[rating] || 0;
-                    const percentage =
-                      summary.totalFeedback > 0
-                        ? (count / summary.totalFeedback) * 100
-                        : 0;
-                    return (
-                      <div key={rating} className="flex items-center gap-3">
-                        <div className="flex items-center gap-1 w-20">
-                          <span className="text-sm font-medium">{rating}</span>
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        </div>
-                        <div className="flex-1 bg-gray-200 rounded-full h-4">
-                          <div
-                            className="bg-yellow-400 h-4 rounded-full"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-600 w-16 text-right">
-                          {count} ({percentage.toFixed(0)}%)
+            {/* Rating Distribution */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="bg-white rounded-2xl shadow-lg p-6 mb-6"
+            >
+              <h3 className="text-xl font-bold text-gray-800 mb-6">
+                Rating Distribution
+              </h3>
+              <div className="space-y-4">
+                {[5, 4, 3, 2, 1].map((rating) => {
+                  const count = summary.ratingDistribution?.[rating] || 0;
+                  const percentage =
+                    summary.totalFeedback > 0
+                      ? (count / summary.totalFeedback) * 100
+                      : 0;
+                  return (
+                    <div key={rating} className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 w-24">
+                        <span className="text-sm font-semibold text-gray-700">
+                          {rating}
                         </span>
+                        <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {summary.recentFeedback && summary.recentFeedback.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">
-                    Recent Comments
-                  </h3>
-                  <div className="space-y-3">
-                    {summary.recentFeedback.map((feedback, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex items-center gap-2">
-                            {renderStars(feedback.rating)}
-                            <span className="text-sm text-gray-600 capitalize">
-                              {feedback.menuId?.mealType}
+                      <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          transition={{ delay: 0.4 + rating * 0.05, duration: 0.5 }}
+                          className="bg-gradient-to-r from-yellow-400 to-orange-400 h-6 rounded-full flex items-center justify-end pr-2"
+                        >
+                          {percentage > 10 && (
+                            <span className="text-xs font-semibold text-white">
+                              {percentage.toFixed(0)}%
                             </span>
-                          </div>
-                          <span className="text-sm text-gray-500">
-                            {new Date(feedback.createdAt).toLocaleDateString()}
+                          )}
+                        </motion.div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-600 w-20 text-right">
+                        {count} ({percentage.toFixed(0)}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* Recent Comments */}
+            {summary.recentFeedback && summary.recentFeedback.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white rounded-2xl shadow-lg p-6"
+              >
+                <h3 className="text-xl font-bold text-gray-800 mb-6">
+                  Recent Comments
+                </h3>
+                <div className="space-y-4">
+                  {summary.recentFeedback.map((feedback, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.45 + index * 0.05 }}
+                      className="border-2 border-gray-100 rounded-xl p-4 hover:border-violet-200 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          {renderStars(feedback.rating)}
+                          <span className="text-sm font-medium text-gray-600 capitalize bg-gray-100 px-3 py-1 rounded-full">
+                            {feedback.menuId?.mealType || "N/A"}
                           </span>
                         </div>
-                        {feedback.comment && (
-                          <p className="text-gray-700">{feedback.comment}</p>
-                        )}
+                        <span className="text-sm text-gray-500">
+                          {new Date(feedback.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      {feedback.comment && (
+                        <p className="text-gray-700 leading-relaxed">
+                          {feedback.comment}
+                        </p>
+                      )}
+                    </motion.div>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
+              </motion.div>
+            )}
+          </>
+        )}
       </div>
     </ModernLayout>
   );
