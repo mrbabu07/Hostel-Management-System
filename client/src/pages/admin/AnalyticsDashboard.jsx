@@ -1,5 +1,17 @@
-import AppLayout from "../../components/layout/AppLayout";
-import { BarChart, TrendingUp, Users, DollarSign } from "lucide-react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
+import { People, TrendingUp, AttachMoney, Star } from "@mui/icons-material";
+import { motion } from "framer-motion";
+import ModernLayout from "../../components/layout/ModernLayout";
+import StatsCard from "../../components/common/StatsCard";
+import ModernBarChart from "../../components/charts/ModernBarChart";
+import ModernLineChart from "../../components/charts/ModernLineChart";
 
 const AnalyticsDashboard = () => {
   const monthlyData = [
@@ -11,120 +23,201 @@ const AnalyticsDashboard = () => {
     { month: "Jun", revenue: 48000, attendance: 90 },
   ];
 
+  const revenueData = monthlyData.map((d) => d.revenue);
+  const attendanceData = monthlyData.map((d) => d.attendance);
+  const labels = monthlyData.map((d) => d.month);
+
+  const metrics = [
+    { name: "Server Uptime", value: 99.9, color: "success" },
+    { name: "Database Performance", value: 95, color: "info" },
+    { name: "API Response Time", value: 88, color: "primary" },
+    { name: "Storage Usage", value: 65, color: "warning" },
+  ];
+
   return (
-    <AppLayout>
-      <div>
-        <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
+    <ModernLayout>
+      <Box>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card
+            sx={{
+              mb: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+            }}
+          >
+            <CardContent sx={{ py: 3 }}>
+              <Typography variant="h4" fontWeight={700} gutterBottom>
+                Analytics Dashboard 📊
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Comprehensive insights and performance metrics
+              </Typography>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Total Students</p>
-                <p className="text-2xl font-bold mt-2">150</p>
-                <p className="text-sm text-green-600 mt-1">
-                  +5% from last month
-                </p>
-              </div>
-              <div className="bg-blue-500 p-3 rounded-lg">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
+        {/* Stats Cards */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <StatsCard
+                title="Total Students"
+                value={150}
+                icon={People}
+                color="primary"
+                trend="up"
+                trendValue="+5%"
+              />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 }}
+            >
+              <StatsCard
+                title="Monthly Revenue"
+                value={48000}
+                icon={AttachMoney}
+                color="success"
+                prefix="₹"
+                trend="up"
+                trendValue="+4%"
+              />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <StatsCard
+                title="Avg Attendance"
+                value={90}
+                icon={TrendingUp}
+                color="info"
+                suffix="%"
+                trend="up"
+                trendValue="+2%"
+              />
+            </motion.div>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25 }}
+            >
+              <StatsCard
+                title="Avg Rating"
+                value={4.2}
+                icon={Star}
+                color="warning"
+                suffix="/5"
+                trend="up"
+                trendValue="+0.3"
+              />
+            </motion.div>
+          </Grid>
+        </Grid>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Monthly Revenue</p>
-                <p className="text-2xl font-bold mt-2">₹48,000</p>
-                <p className="text-sm text-green-600 mt-1">
-                  +4% from last month
-                </p>
-              </div>
-              <div className="bg-green-500 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
+        <Grid container spacing={3}>
+          {/* Revenue Chart */}
+          <Grid item xs={12} lg={6}>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <ModernBarChart
+                title="Monthly Revenue Trend"
+                data={revenueData}
+                labels={labels}
+                label="Revenue (₹)"
+              />
+            </motion.div>
+          </Grid>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Avg Attendance</p>
-                <p className="text-2xl font-bold mt-2">90%</p>
-                <p className="text-sm text-green-600 mt-1">
-                  +2% from last month
-                </p>
-              </div>
-              <div className="bg-purple-500 p-3 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
+          {/* Attendance Chart */}
+          <Grid item xs={12} lg={6}>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.35 }}
+            >
+              <ModernLineChart
+                title="Attendance Trend"
+                data={attendanceData}
+                labels={labels}
+                label="Attendance (%)"
+              />
+            </motion.div>
+          </Grid>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Avg Rating</p>
-                <p className="text-2xl font-bold mt-2">4.2/5</p>
-                <p className="text-sm text-green-600 mt-1">
-                  +0.3 from last month
-                </p>
-              </div>
-              <div className="bg-yellow-500 p-3 rounded-lg">
-                <BarChart className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Monthly Revenue Trend
-            </h2>
-            <div className="space-y-3">
-              {monthlyData.map((data) => (
-                <div key={data.month} className="flex items-center gap-3">
-                  <span className="w-12 text-sm font-medium">{data.month}</span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-6">
-                    <div
-                      className="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
-                      style={{ width: `${(data.revenue / 50000) * 100}%` }}
-                    >
-                      <span className="text-xs text-white font-medium">
-                        ₹{data.revenue.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Attendance Trend</h2>
-            <div className="space-y-3">
-              {monthlyData.map((data) => (
-                <div key={data.month} className="flex items-center gap-3">
-                  <span className="w-12 text-sm font-medium">{data.month}</span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-6">
-                    <div
-                      className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
-                      style={{ width: `${data.attendance}%` }}
-                    >
-                      <span className="text-xs text-white font-medium">
-                        {data.attendance}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </AppLayout>
+          {/* System Metrics */}
+          <Grid item xs={12}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    System Performance Metrics
+                  </Typography>
+                  <Grid container spacing={3} sx={{ mt: 1 }}>
+                    {metrics.map((metric, index) => (
+                      <Grid item xs={12} sm={6} md={3} key={index}>
+                        <Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              mb: 1,
+                            }}
+                          >
+                            <Typography variant="body2" fontWeight={500}>
+                              {metric.name}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              color="primary"
+                            >
+                              {metric.value}%
+                            </Typography>
+                          </Box>
+                          <LinearProgress
+                            variant="determinate"
+                            value={metric.value}
+                            color={metric.color}
+                            sx={{
+                              height: 8,
+                              borderRadius: 4,
+                            }}
+                          />
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Grid>
+        </Grid>
+      </Box>
+    </ModernLayout>
   );
 };
 

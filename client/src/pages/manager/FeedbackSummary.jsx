@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { feedbackService } from "../../services/feedback.service";
 import { toISODate } from "../../utils/formatDate";
 import Input from "../../components/common/Input";
@@ -53,7 +53,7 @@ const FeedbackSummary = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div>
         <h1 className="text-3xl font-bold mb-6">Feedback Summary</h1>
 
@@ -184,7 +184,7 @@ const FeedbackSummary = () => {
           )}
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

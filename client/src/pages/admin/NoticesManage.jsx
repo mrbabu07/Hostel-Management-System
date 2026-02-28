@@ -1,10 +1,32 @@
 import { useState, useEffect } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Stack,
+  IconButton,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material";
+import { Notifications, Add, Edit, Delete, PushPin } from "@mui/icons-material";
+import { motion } from "framer-motion";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { noticesService } from "../../services/notices.service";
 import { formatDateTime } from "../../utils/formatDate";
-import Button from "../../components/common/Button";
-import Modal from "../../components/common/Modal";
-import Input from "../../components/common/Input";
+import EmptyState from "../../components/common/EmptyState";
+import ModernLoader from "../../components/common/ModernLoader";
 
 const NoticesManage = () => {
   const [notices, setNotices] = useState([]);
@@ -82,128 +104,233 @@ const NoticesManage = () => {
     setIsModalOpen(true);
   };
 
-  return (
-    <AppLayout>
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Notices Management</h1>
-          <Button onClick={openCreateModal}>Create Notice</Button>
-        </div>
+  const getAudienceColor = (audience) => {
+    switch (audience) {
+      case "all":
+        return "primary";
+      case "student":
+        return "success";
+      case "manager":
+        return "warning";
+      default:
+        return "default";
+    }
+  };
 
+  return (
+    <ModernLayout>
+      <Box>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card
+            sx={{
+              mb: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+            }}
+          >
+            <CardContent sx={{ py: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Box>
+                  <Typography variant="h4" fontWeight={700} gutterBottom>
+                    Notices Management 📢
+                  </Typography>
+                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                    Create and manage announcements for users
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={openCreateModal}
+                  sx={{
+                    bgcolor: "white",
+                    color: "primary.main",
+                    "&:hover": { bgcolor: "grey.100" },
+                  }}
+                >
+                  Create Notice
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Notices List */}
         {loading ? (
-          <div className="text-center py-8">Loading...</div>
+          <ModernLoader />
         ) : notices.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">No notices found</p>
-          </div>
+          <EmptyState
+            icon={Notifications}
+            title="No Notices Found"
+            description="Create your first notice to get started"
+          />
         ) : (
-          <div className="space-y-4">
-            {notices.map((notice) => (
-              <div key={notice._id} className="bg-white rounded-lg shadow p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-semibold">{notice.title}</h3>
-                      {notice.isPinned && (
-                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
-                          Pinned
-                        </span>
-                      )}
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs capitalize">
-                        {notice.audience}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Posted by: {notice.createdBy?.name} |{" "}
-                      {formatDateTime(notice.createdAt)}
-                    </p>
-                    <p className="text-gray-700">{notice.content}</p>
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => handleEdit(notice)}
-                      className="text-blue-600 hover:text-blue-800"
+          <Stack spacing={2}>
+            {notices.map((notice, index) => (
+              <motion.div
+                key={notice._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card
+                  sx={{
+                    transition: "all 0.3s",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 4,
+                    },
+                  }}
+                >
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "start",
+                      }}
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(notice._id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
+                      <Box sx={{ flex: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
+                          <Typography variant="h6" fontWeight={600}>
+                            {notice.title}
+                          </Typography>
+                          {notice.isPinned && (
+                            <Chip
+                              icon={<PushPin />}
+                              label="Pinned"
+                              size="small"
+                              color="warning"
+                            />
+                          )}
+                          <Chip
+                            label={notice.audience}
+                            size="small"
+                            color={getAudienceColor(notice.audience)}
+                            sx={{ textTransform: "capitalize" }}
+                          />
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Posted by: {notice.createdBy?.name} |{" "}
+                          {formatDateTime(notice.createdAt)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          {notice.content}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(notice)}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(notice._id)}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </Stack>
         )}
 
-        <Modal
-          isOpen={isModalOpen}
+        {/* Create/Edit Modal */}
+        <Dialog
+          open={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setEditingNotice(null);
           }}
-          title={editingNotice ? "Edit Notice" : "Create Notice"}
+          maxWidth="md"
+          fullWidth
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Title"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              required
-            />
+          <DialogTitle>
+            {editingNotice ? "Edit Notice" : "Create Notice"}
+          </DialogTitle>
+          <form onSubmit={handleSubmit}>
+            <DialogContent>
+              <Stack spacing={3}>
+                <TextField
+                  label="Title"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  required
+                  fullWidth
+                />
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Content</label>
-              <textarea
-                value={formData.content}
-                onChange={(e) =>
-                  setFormData({ ...formData, content: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-lg"
-                rows="5"
-                required
-              />
-            </div>
+                <TextField
+                  label="Content"
+                  value={formData.content}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
+                  multiline
+                  rows={5}
+                  required
+                  fullWidth
+                />
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Audience</label>
-              <select
-                value={formData.audience}
-                onChange={(e) =>
-                  setFormData({ ...formData, audience: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="all">All Users</option>
-                <option value="student">Students Only</option>
-                <option value="manager">Managers Only</option>
-              </select>
-            </div>
+                <FormControl fullWidth>
+                  <InputLabel>Audience</InputLabel>
+                  <Select
+                    value={formData.audience}
+                    label="Audience"
+                    onChange={(e) =>
+                      setFormData({ ...formData, audience: e.target.value })
+                    }
+                  >
+                    <MenuItem value="all">All Users</MenuItem>
+                    <MenuItem value="student">Students Only</MenuItem>
+                    <MenuItem value="manager">Managers Only</MenuItem>
+                  </Select>
+                </FormControl>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isPinned"
-                checked={formData.isPinned}
-                onChange={(e) =>
-                  setFormData({ ...formData, isPinned: e.target.checked })
-                }
-                className="w-4 h-4"
-              />
-              <label htmlFor="isPinned" className="text-sm font-medium">
-                Pin this notice
-              </label>
-            </div>
-
-            <div className="flex gap-2 justify-end">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.isPinned}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isPinned: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Pin this notice"
+                />
+              </Stack>
+            </DialogContent>
+            <DialogActions>
               <Button
-                type="button"
-                variant="secondary"
                 onClick={() => {
                   setIsModalOpen(false);
                   setEditingNotice(null);
@@ -211,14 +338,14 @@ const NoticesManage = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" variant="contained">
                 {editingNotice ? "Update" : "Create"}
               </Button>
-            </div>
+            </DialogActions>
           </form>
-        </Modal>
-      </div>
-    </AppLayout>
+        </Dialog>
+      </Box>
+    </ModernLayout>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { attendanceService } from "../../services/attendance.service";
 import { toISODate } from "../../utils/formatDate";
 import Button from "../../components/common/Button";
@@ -43,7 +43,7 @@ const AttendanceMark = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div>
         <h1 className="text-3xl font-bold mb-6">Mark Attendance</h1>
 
@@ -122,7 +122,7 @@ const AttendanceMark = () => {
           </Button>
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

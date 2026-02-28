@@ -110,3 +110,128 @@ module.exports = {
   getAttendanceReport,
   getMyAttendance,
 };
+
+// @desc    Export attendance as CSV
+// @route   GET /api/v1/attendance/export
+// @access  Manager/Admin
+const exportAttendanceCSV = asyncHandler(async (req, res) => {
+  const { date, mealType, month, year } = req.query;
+  const CSVGenerator = require("../utils/csv");
+
+  let query = {};
+
+  if (date) {
+    const targetDate = new Date(date);
+    query.date = {
+      $gte: new Date(targetDate.setHours(0, 0, 0, 0)),
+      $lte: new Date(targetDate.setHours(23, 59, 59, 999)),
+    };
+  } else if (month && year) {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+    query.date = { $gte: startDate, $lte: endDate };
+  }
+
+  if (mealType) query.mealType = mealType;
+
+  const attendance = await Attendance.find(query)
+    .populate("userId", "name rollNumber roomNumber")
+    .populate("markedBy", "name")
+    .sort({ date: -1 })
+    .lean();
+
+  const csv = CSVGenerator.generateAttendanceCSV(attendance);
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=attendance-${date || `${month}-${year}`}.csv`,
+  );
+  res.send(csv);
+});
+
+module.exports = {
+  markAttendance,
+  getAttendanceReport,
+  getMyAttendance,
+  exportAttendanceCSV,
+};
+
+// @desc    Student self-mark attendance
+// @route   POST /api/v1/attendance/self-mark
+// @access  Private (Student)
+const markSelfAttendance = asyncHandler(async (req, res) => {
+  const { date, mealType } = req.body;
+
+  const attendanceDate = new Date(date);
+  attendanceDate.setHours(0, 0, 0, 0);
+
+  // Check if already marked
+  const existing = await Attendance.findOne({
+    student: req.user._id,
+    date: attendanceDate,
+    mealType,
+  });
+
+  if (existing) {
+    throw new ApiError(400, "Attendance already marked for this meal");
+  }
+
+  const attendance = await Attendance.create({
+    student: req.user._id,
+    date: attendanceDate,
+    mealType,
+    present: true,
+    approved: false,
+    markedBy: req.user._id,
+  });
+
+  res.status(201).json(
+    new ApiResponse(
+      201,
+      { attendance },
+      "Attendance marked. Waiting for manager approval",
+    ),
+  );
+});
+
+// @desc    Approve attendance
+// @route   PATCH /api/v1/attendance/:id/approve
+// @access  Private (Manager/Admin)
+const approveAttendance = asyncHandler(async (req, res) => {
+  const attendance = await Attendance.findById(req.params.id);
+
+  if (!attendance) {
+    throw new ApiError(404, "Attendance record not found");
+  }
+
+  attendance.approved = true;
+  attendance.approvedBy = req.user._id;
+  attendance.approvedAt = new Date();
+  await attendance.save();
+
+  res.json(
+    new ApiResponse(200, { attendance }, "Attendance approved successfully"),
+  );
+});
+
+// @desc    Get pending attendance for approval
+// @route   GET /api/v1/attendance/pending
+// @access  Private (Manager/Admin)
+const getPendingAttendance = asyncHandler(async (req, res) => {
+  const attendance = await Attendance.find({ approved: false })
+    .populate("student", "name email rollNumber roomNumber")
+    .sort("-date");
+
+  res.json(new ApiResponse(200, { attendance, count: attendance.length }));
+});
+
+module.exports = {
+  markAttendance,
+  getAttendanceReport,
+  getMyAttendance,
+  exportAttendanceCSV,
+  markSelfAttendance,
+  approveAttendance,
+  getPendingAttendance,
+};

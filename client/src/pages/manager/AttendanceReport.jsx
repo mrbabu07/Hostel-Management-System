@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { attendanceService } from "../../services/attendance.service";
 import { toISODate, formatDate } from "../../utils/formatDate";
 import Input from "../../components/common/Input";
@@ -43,7 +43,7 @@ const AttendanceReport = () => {
   const stats = calculateStats();
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div>
         <h1 className="text-3xl font-bold mb-6">Attendance Report</h1>
 
@@ -145,7 +145,7 @@ const AttendanceReport = () => {
           )}
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

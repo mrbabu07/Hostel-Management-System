@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { attendanceService } from "../../services/attendance.service";
 import {
   getCurrentMonth,
@@ -32,7 +32,7 @@ const AttendanceHistory = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div>
         <h1 className="text-3xl font-bold mb-6">Attendance History</h1>
 
@@ -115,7 +115,7 @@ const AttendanceHistory = () => {
           </table>
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

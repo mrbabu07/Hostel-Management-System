@@ -17,6 +17,10 @@ const menuSchema = new mongoose.Schema(
         description: String,
       },
     ],
+    imageUrl: {
+      type: String,
+      default: "",
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

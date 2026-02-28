@@ -1,9 +1,30 @@
 import { useState, useEffect } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Grid,
+  Stack,
+} from "@mui/material";
+import { Report, FilterList } from "@mui/icons-material";
+import { motion } from "framer-motion";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { complaintsService } from "../../services/complaints.service";
 import { formatDateTime } from "../../utils/formatDate";
-import Modal from "../../components/common/Modal";
-import Button from "../../components/common/Button";
+import EmptyState from "../../components/common/EmptyState";
+import ModernLoader from "../../components/common/ModernLoader";
 
 const ComplaintsManage = () => {
   const [complaints, setComplaints] = useState([]);
@@ -60,176 +81,257 @@ const ComplaintsManage = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "warning";
       case "in-progress":
-        return "bg-blue-100 text-blue-800";
+        return "info";
       case "resolved":
-        return "bg-green-100 text-green-800";
+        return "success";
       case "rejected":
-        return "bg-red-100 text-red-800";
+        return "error";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "default";
     }
   };
 
   return (
-    <AppLayout>
-      <div>
-        <h1 className="text-3xl font-bold mb-6">Complaints Management</h1>
+    <ModernLayout>
+      <Box>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card
+            sx={{
+              mb: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+            }}
+          >
+            <CardContent sx={{ py: 3 }}>
+              <Typography variant="h4" fontWeight={700} gutterBottom>
+                Complaints Management 📋
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Review and manage student complaints
+              </Typography>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Category</label>
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="">All Categories</option>
-                <option value="food-quality">Food Quality</option>
-                <option value="service">Service</option>
-                <option value="hygiene">Hygiene</option>
-                <option value="billing">Billing</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={statusFilter}
+                      label="Status"
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      startAdornment={<FilterList sx={{ mr: 1 }} />}
+                    >
+                      <MenuItem value="">All Status</MenuItem>
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="in-progress">In Progress</MenuItem>
+                      <MenuItem value="resolved">Resolved</MenuItem>
+                      <MenuItem value="rejected">Rejected</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      value={categoryFilter}
+                      label="Category"
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      startAdornment={<FilterList sx={{ mr: 1 }} />}
+                    >
+                      <MenuItem value="">All Categories</MenuItem>
+                      <MenuItem value="food-quality">Food Quality</MenuItem>
+                      <MenuItem value="service">Service</MenuItem>
+                      <MenuItem value="hygiene">Hygiene</MenuItem>
+                      <MenuItem value="billing">Billing</MenuItem>
+                      <MenuItem value="other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-          {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : complaints.length === 0 ? (
-            <div className="text-center py-8 text-gray-600">
-              No complaints found
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {complaints.map((complaint) => (
-                <div
-                  key={complaint._id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+        {/* Complaints List */}
+        {loading ? (
+          <ModernLoader />
+        ) : complaints.length === 0 ? (
+          <EmptyState
+            icon={Report}
+            title="No Complaints Found"
+            description="There are no complaints matching your filters"
+          />
+        ) : (
+          <Stack spacing={2}>
+            {complaints.map((complaint, index) => (
+              <motion.div
+                key={complaint._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card
+                  sx={{
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 4,
+                    },
+                  }}
                   onClick={() => openComplaint(complaint)}
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-semibold">{complaint.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        By: {complaint.userId?.name} |{" "}
-                        {formatDateTime(complaint.createdAt)}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <span
-                        className={`px-2 py-1 rounded text-sm capitalize ${getStatusColor(complaint.status)}`}
-                      >
-                        {complaint.status}
-                      </span>
-                      <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm capitalize">
-                        {complaint.category}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 text-sm">
-                    {complaint.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "start",
+                        mb: 2,
+                      }}
+                    >
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6" fontWeight={600} gutterBottom>
+                          {complaint.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          By: {complaint.userId?.name} |{" "}
+                          {formatDateTime(complaint.createdAt)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {complaint.description}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
+                        <Chip
+                          label={complaint.status}
+                          size="small"
+                          color={getStatusColor(complaint.status)}
+                          sx={{ textTransform: "capitalize" }}
+                        />
+                        <Chip
+                          label={complaint.category}
+                          size="small"
+                          variant="outlined"
+                          sx={{ textTransform: "capitalize" }}
+                        />
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </Stack>
+        )}
 
-        <Modal
-          isOpen={isModalOpen}
+        {/* Complaint Details Modal */}
+        <Dialog
+          open={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedComplaint(null);
           }}
-          title="Complaint Details"
+          maxWidth="md"
+          fullWidth
         >
+          <DialogTitle>Complaint Details</DialogTitle>
           {selectedComplaint && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg">
-                  {selectedComplaint.title}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Category:{" "}
-                  <span className="capitalize">
-                    {selectedComplaint.category}
-                  </span>
-                </p>
-                <p className="text-sm text-gray-600">
-                  Submitted by: {selectedComplaint.userId?.name} (
-                  {selectedComplaint.userId?.email})
-                </p>
-                <p className="text-sm text-gray-600">
-                  Date: {formatDateTime(selectedComplaint.createdAt)}
-                </p>
-              </div>
+            <>
+              <DialogContent>
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      {selectedComplaint.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Category:{" "}
+                      <Chip
+                        label={selectedComplaint.category}
+                        size="small"
+                        sx={{ textTransform: "capitalize" }}
+                      />
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Submitted by: {selectedComplaint.userId?.name} (
+                      {selectedComplaint.userId?.email})
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Date: {formatDateTime(selectedComplaint.createdAt)}
+                    </Typography>
+                  </Box>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Description
-                </label>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded">
-                  {selectedComplaint.description}
-                </p>
-              </div>
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Description
+                    </Typography>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="body2">
+                          {selectedComplaint.description}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Box>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Admin Note
-                </label>
-                <textarea
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  rows="3"
-                  placeholder="Add notes for this complaint..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Update Status
-                </label>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleUpdateStatus("in-progress")}
-                    variant="secondary"
-                  >
-                    In Progress
-                  </Button>
-                  <Button onClick={() => handleUpdateStatus("resolved")}>
-                    Resolve
-                  </Button>
-                  <Button
-                    onClick={() => handleUpdateStatus("rejected")}
-                    variant="secondary"
-                  >
-                    Reject
-                  </Button>
-                </div>
-              </div>
-            </div>
+                  <TextField
+                    label="Admin Note"
+                    value={adminNote}
+                    onChange={(e) => setAdminNote(e.target.value)}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    placeholder="Add notes for this complaint..."
+                  />
+                </Stack>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => handleUpdateStatus("in-progress")}
+                  variant="outlined"
+                  color="info"
+                >
+                  In Progress
+                </Button>
+                <Button
+                  onClick={() => handleUpdateStatus("resolved")}
+                  variant="contained"
+                  color="success"
+                >
+                  Resolve
+                </Button>
+                <Button
+                  onClick={() => handleUpdateStatus("rejected")}
+                  variant="outlined"
+                  color="error"
+                >
+                  Reject
+                </Button>
+              </DialogActions>
+            </>
           )}
-        </Modal>
-      </div>
-    </AppLayout>
+        </Dialog>
+      </Box>
+    </ModernLayout>
   );
 };
 

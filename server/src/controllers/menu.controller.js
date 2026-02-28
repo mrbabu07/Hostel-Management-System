@@ -3,6 +3,33 @@ const Menu = require("../models/Menu.model");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 
+// @desc    Get today's menu
+// @route   GET /api/v1/menus/today
+// @access  Private
+const getTodayMenu = asyncHandler(async (req, res) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const menus = await Menu.find({
+    date: { $gte: today, $lt: tomorrow },
+  })
+    .populate("createdBy", "name email")
+    .sort("mealType");
+
+  // Format the response
+  const formattedMenu = {
+    date: today,
+    breakfast: menus.find((m) => m.mealType === "breakfast"),
+    lunch: menus.find((m) => m.mealType === "lunch"),
+    dinner: menus.find((m) => m.mealType === "dinner"),
+  };
+
+  res.json(new ApiResponse(200, { menu: formattedMenu }));
+});
+
 // @desc    Get menus by date
 // @route   GET /api/v1/menus?date=YYYY-MM-DD
 // @access  Private
@@ -80,6 +107,7 @@ const deleteMenu = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  getTodayMenu,
   getMenus,
   createMenu,
   updateMenu,

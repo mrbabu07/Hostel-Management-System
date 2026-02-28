@@ -2,52 +2,76 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
+import ModernLoader from "../components/common/ModernLoader";
+
+// Public Pages
+import HomePublic from "../pages/public/HomePublic";
+
+// Shared Pages
+import Home from "../pages/shared/Home";
 
 // Auth Pages
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
+import ModernLogin from "../pages/auth/ModernLogin";
+import ModernRegister from "../pages/auth/ModernRegister";
 
 // Student Pages
-import StudentDashboard from "../pages/student/StudentDashboard";
+import ModernStudentDashboard from "../pages/student/ModernStudentDashboard";
 import MenuView from "../pages/student/MenuView";
 import MealConfirm from "../pages/student/MealConfirm";
 import AttendanceHistory from "../pages/student/AttendanceHistory";
-import MyBill from "../pages/student/MyBill";
+import SelfAttendance from "../pages/student/SelfAttendance";
+import ModernMyBill from "../pages/student/ModernMyBill";
 import Complaints from "../pages/student/Complaints";
 import Notices from "../pages/student/Notices";
 import Feedback from "../pages/student/Feedback";
+import StudentChat from "../pages/student/Chat";
+import Profile from "../pages/student/Profile";
 
 // Manager Pages
-import ManagerDashboard from "../pages/manager/ManagerDashboard";
+import ModernManagerDashboard from "../pages/manager/ModernManagerDashboard";
 import MenuManage from "../pages/manager/MenuManage";
+import EnhancedMenuManage from "../pages/manager/EnhancedMenuManage";
 import AttendanceMark from "../pages/manager/AttendanceMark";
 import AttendanceReport from "../pages/manager/AttendanceReport";
+import AttendanceApproval from "../pages/manager/AttendanceApproval";
 import FeedbackSummary from "../pages/manager/FeedbackSummary";
+import Inventory from "../pages/manager/Inventory";
+import ManagerChat from "../pages/manager/Chat";
+import Reports from "../pages/manager/Reports";
 
 // Admin Pages
-import AdminDashboard from "../pages/admin/AdminDashboard";
+import ModernAdminDashboard from "../pages/admin/ModernAdminDashboard";
 import UsersManage from "../pages/admin/UsersManage";
 import ComplaintsManage from "../pages/admin/ComplaintsManage";
 import NoticesManage from "../pages/admin/NoticesManage";
 import BillingManage from "../pages/admin/BillingManage";
 import AnalyticsDashboard from "../pages/admin/AnalyticsDashboard";
+import Settings from "../pages/admin/Settings";
+import AdminChat from "../pages/admin/Chat";
 
 const AppRoutes = () => {
   const { loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
+    return <ModernLoader fullScreen text="Loading application..." />;
   }
 
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/" element={<HomePublic />} />
+      <Route path="/login" element={<ModernLogin />} />
+      <Route path="/register" element={<ModernRegister />} />
+
+      {/* Shared Protected Route */}
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Student Routes */}
       <Route
@@ -55,7 +79,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["student"]}>
-              <StudentDashboard />
+              <ModernStudentDashboard />
             </RoleRoute>
           </ProtectedRoute>
         }
@@ -85,6 +109,16 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["student"]}>
+              <SelfAttendance />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/attendance-history"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["student"]}>
               <AttendanceHistory />
             </RoleRoute>
           </ProtectedRoute>
@@ -95,7 +129,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["student"]}>
-              <MyBill />
+              <ModernMyBill />
             </RoleRoute>
           </ProtectedRoute>
         }
@@ -106,6 +140,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <RoleRoute allowedRoles={["student"]}>
               <Complaints />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/chat"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["student"]}>
+              <StudentChat />
             </RoleRoute>
           </ProtectedRoute>
         }
@@ -130,6 +174,16 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/student/profile"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["student"]}>
+              <Profile />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Manager Routes */}
       <Route
@@ -137,7 +191,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["manager"]}>
-              <ManagerDashboard />
+              <ModernManagerDashboard />
             </RoleRoute>
           </ProtectedRoute>
         }
@@ -147,13 +201,23 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["manager"]}>
-              <MenuManage />
+              <EnhancedMenuManage />
             </RoleRoute>
           </ProtectedRoute>
         }
       />
       <Route
         path="/manager/attendance"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["manager"]}>
+              <AttendanceApproval />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/attendance-mark"
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["manager"]}>
@@ -173,11 +237,41 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/manager/inventory"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["manager"]}>
+              <Inventory />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/manager/feedback"
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["manager"]}>
               <FeedbackSummary />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/chat"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["manager"]}>
+              <ManagerChat />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/reports"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["manager"]}>
+              <Reports />
             </RoleRoute>
           </ProtectedRoute>
         }
@@ -189,7 +283,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
+              <ModernAdminDashboard />
             </RoleRoute>
           </ProtectedRoute>
         }
@@ -235,6 +329,16 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/admin/chat"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["admin"]}>
+              <AdminChat />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin/analytics"
         element={
           <ProtectedRoute>
@@ -244,10 +348,19 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["admin"]}>
+              <Settings />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default Redirects */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

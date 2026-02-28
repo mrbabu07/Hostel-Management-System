@@ -1,5 +1,6 @@
 const express = require("express");
 const {
+  getTodayMenu,
   getMenus,
   createMenu,
   updateMenu,
@@ -11,6 +12,7 @@ const { authorize } = require("../middleware/role.middleware");
 
 const router = express.Router();
 
+router.get("/today", protect, getTodayMenu);
 router.get("/", protect, getMenus);
 router.post(
   "/",

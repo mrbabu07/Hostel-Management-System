@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { feedbackService } from "../../services/feedback.service";
 import { toISODate } from "../../utils/formatDate";
 import Button from "../../components/common/Button";
@@ -37,7 +37,7 @@ const Feedback = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div className="max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Give Feedback</h1>
 
@@ -120,7 +120,7 @@ const Feedback = () => {
           </form>
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

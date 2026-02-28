@@ -20,6 +20,17 @@ const attendanceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    approved: {
+      type: Boolean,
+      default: false,
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    approvedAt: {
+      type: Date,
+    },
     markedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

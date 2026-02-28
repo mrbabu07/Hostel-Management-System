@@ -43,6 +43,16 @@ const billSchema = new mongoose.Schema(
       enum: ["pending", "paid"],
       default: "pending",
     },
+    paidAt: {
+      type: Date,
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["stripe", "cash", "other"],
+    },
+    transactionId: {
+      type: String,
+    },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

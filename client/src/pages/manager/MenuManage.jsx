@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { menuService } from "../../services/menu.service";
 import { toISODate } from "../../utils/formatDate";
 import Button from "../../components/common/Button";
@@ -111,7 +111,7 @@ const MenuManage = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div>
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Menu Management</h1>
@@ -269,7 +269,7 @@ const MenuManage = () => {
           </form>
         </Modal>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

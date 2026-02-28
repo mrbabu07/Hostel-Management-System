@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Login</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #667eea;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      button {
+        background: #667eea;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 5px 10px 0;
+      }
+      button:hover {
+        background: #5568d3;
+      }
+      .output {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      .success {
+        color: #10b981;
+      }
+      .error {
+        color: #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 Login Test Tool</h1>
+      <p>Test the login API and localStorage</p>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Email"
+        value="student@hostel.com"
+      />
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        value="Student@123"
+      />
+
+      <button onclick="testLogin()">Test Login</button>
+      <button onclick="checkStorage()">Check Storage</button>
+      <button onclick="clearStorage()">Clear Storage</button>
+
+      <div id="output" class="output">Ready to test...</div>
+    </div>
+
+    <script>
+      const output = document.getElementById("output");
+
+      function log(message, type = "info") {
+        const timestamp = new Date().toLocaleTimeString();
+        const className =
+          type === "success" ? "success" : type === "error" ? "error" : "";
+        output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+      }
+
+      async function testLogin() {
+        output.innerHTML = "";
+        log("🚀 Starting login test...");
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        log(`📧 Email: ${email}`);
+        log(`🔑 Password: ${password}`);
+
+        try {
+          log("📡 Sending POST request to /api/v1/auth/login...");
+
+          const response = await fetch(
+            "http://localhost:5000/api/v1/auth/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            },
+          );
+
+          log(`📊 Response status: ${response.status} ${response.statusText}`);
+
+          const data = await response.json();
+          log("📦 Response data:");
+          log(JSON.stringify(data, null, 2));
+
+          if (response.ok) {
+            log("✅ Login successful!", "success");
+
+            // Extract token and user
+            const token = data.data?.token || data.token;
+            const user = data.data?.user || data.user;
+
+            log(`🔑 Token: ${token ? "Found" : "Missing"}`);
+            log(`👤 User: ${user ? JSON.stringify(user, null, 2) : "Missing"}`);
+
+            if (token && user) {
+              // Save to localStorage
+              localStorage.setItem("token", token);
+              localStorage.setItem("user", JSON.stringify(user));
+              log("💾 Saved to localStorage", "success");
+
+              // Verify
+              const savedToken = localStorage.getItem("token");
+              const savedUser = localStorage.getItem("user");
+              log(
+                `✅ Token in storage: ${savedToken ? "Yes" : "No"}`,
+                "success",
+              );
+              log(`✅ User in storage: ${savedUser ? "Yes" : "No"}`, "success");
+
+              if (savedUser) {
+                log("👤 Saved user data:");
+                log(savedUser);
+              }
+            } else {
+              log("❌ Missing token or user in response", "error");
+            }
+          } else {
+            log(`❌ Login failed: ${data.message || "Unknown error"}`, "error");
+          }
+        } catch (error) {
+          log(`❌ Error: ${error.message}`, "error");
+          console.error(error);
+        }
+      }
+
+      function checkStorage() {
+        output.innerHTML = "";
+        log("🔍 Checking localStorage...");
+
+        const token = localStorage.getItem("token");
+        const user = localStorage.getItem("user");
+
+        log(`Token: ${token ? "✅ Found" : "❌ Not found"}`);
+        if (token) {
+          log(`Token value: ${token.substring(0, 50)}...`);
+        }
+
+        log(`User: ${user ? "✅ Found" : "❌ Not found"}`);
+        if (user) {
+          log("User data:");
+          log(user);
+          try {
+            const parsed = JSON.parse(user);
+            log("Parsed user:");
+            log(JSON.stringify(parsed, null, 2));
+          } catch (e) {
+            log("❌ Failed to parse user data", "error");
+          }
+        }
+
+        log("\n📊 All localStorage keys:");
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          log(`  ${key}: ${localStorage.getItem(key).substring(0, 50)}...`);
+        }
+      }
+
+      function clearStorage() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        output.innerHTML = "";
+        log("🗑️ Cleared token and user from localStorage", "success");
+      }
+
+      // Auto-check storage on load
+      window.addEventListener("load", () => {
+        setTimeout(checkStorage, 500);
+      });
+    </script>
+  </body>
+</html>

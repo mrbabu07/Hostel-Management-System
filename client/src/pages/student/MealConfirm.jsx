@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { mealPlanService } from "../../services/mealplan.service";
 import { toISODate } from "../../utils/formatDate";
 import Button from "../../components/common/Button";
@@ -34,7 +34,7 @@ const MealConfirm = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div className="max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Confirm Meals</h1>
 
@@ -86,7 +86,7 @@ const MealConfirm = () => {
           </form>
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

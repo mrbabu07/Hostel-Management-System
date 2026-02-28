@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { noticesService } from "../../services/notices.service";
 import { formatDateTime } from "../../utils/formatDate";
 import { Pin } from "lucide-react";
@@ -35,7 +35,7 @@ const Notices = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div>
         <h1 className="text-3xl font-bold mb-6">Notices</h1>
 
@@ -67,7 +67,7 @@ const Notices = () => {
           ))}
         </div>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 

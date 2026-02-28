@@ -15,18 +15,13 @@ const generateBills = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Month and year are required");
   }
 
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0, 23, 59, 59);
+  // Fixed monthly rate
+  const MONTHLY_RATE = 6000; // 6000 TK per month
 
   // Get all students
   const students = await User.find({ role: "student", isActive: true });
 
   const bills = [];
-  const rates = {
-    breakfast: 30,
-    lunch: 50,
-    dinner: 50,
-  };
 
   for (const student of students) {
     // Check if bill already exists
@@ -38,47 +33,31 @@ const generateBills = asyncHandler(async (req, res) => {
 
     if (existingBill) continue;
 
-    // Get attendance for this student for the month
-    const attendance = await Attendance.find({
-      student: student._id,
-      date: { $gte: startDate, $lte: endDate },
-      present: true,
-    });
-
+    // Fixed breakdown for display purposes
     const breakdown = {
       breakfast: {
-        count: attendance.filter((a) => a.mealType === "breakfast").length,
-        rate: rates.breakfast,
-        total: 0,
+        count: 30, // Assuming 30 days
+        rate: 67, // Approximately 2000 TK for breakfast
+        total: 2000,
       },
       lunch: {
-        count: attendance.filter((a) => a.mealType === "lunch").length,
-        rate: rates.lunch,
-        total: 0,
+        count: 30,
+        rate: 67, // Approximately 2000 TK for lunch
+        total: 2000,
       },
       dinner: {
-        count: attendance.filter((a) => a.mealType === "dinner").length,
-        rate: rates.dinner,
-        total: 0,
+        count: 30,
+        rate: 67, // Approximately 2000 TK for dinner
+        total: 2000,
       },
     };
-
-    breakdown.breakfast.total =
-      breakdown.breakfast.count * breakdown.breakfast.rate;
-    breakdown.lunch.total = breakdown.lunch.count * breakdown.lunch.rate;
-    breakdown.dinner.total = breakdown.dinner.count * breakdown.dinner.rate;
-
-    const totalAmount =
-      breakdown.breakfast.total +
-      breakdown.lunch.total +
-      breakdown.dinner.total;
 
     const bill = await Bill.create({
       student: student._id,
       month: parseInt(month),
       year: parseInt(year),
       breakdown,
-      totalAmount,
+      totalAmount: MONTHLY_RATE,
       generatedBy: req.user._id,
     });
 
@@ -122,11 +101,16 @@ const getMyBill = asyncHandler(async (req, res) => {
 
 // @desc    Get all bills
 // @route   GET /api/v1/billing?month=MM&year=YYYY
-// @access  Private (Admin)
+// @access  Private (Admin, Student)
 const getAllBills = asyncHandler(async (req, res) => {
   const { month, year } = req.query;
 
   let query = {};
+
+  // If student, only show their bills
+  if (req.user.role === "student") {
+    query.student = req.user._id;
+  }
 
   if (month && year) {
     query.month = parseInt(month);
@@ -145,4 +129,73 @@ module.exports = {
   generateBills,
   getMyBill,
   getAllBills,
+};
+
+// @desc    Export bills as CSV
+// @route   GET /api/v1/billing/export
+// @access  Admin
+const exportBillsCSV = asyncHandler(async (req, res) => {
+  const { month, year } = req.query;
+  const CSVGenerator = require("../utils/csv");
+
+  const query = {};
+  if (month) query.month = parseInt(month);
+  if (year) query.year = parseInt(year);
+
+  const bills = await Bill.find(query)
+    .populate("userId", "name rollNumber roomNumber")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const csv = CSVGenerator.generateBillingCSV(bills);
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=bills-${month}-${year}.csv`,
+  );
+  res.send(csv);
+});
+
+// @desc    Download bill as PDF
+// @route   GET /api/v1/billing/:id/pdf
+// @access  Student/Admin
+const downloadBillPDF = asyncHandler(async (req, res) => {
+  const PDFGenerator = require("../utils/pdf");
+  const Settings = require("../models/Settings.model");
+
+  const bill = await Bill.findById(req.params.id).populate(
+    "userId",
+    "name rollNumber roomNumber",
+  );
+
+  if (!bill) {
+    throw new ApiError(404, "Bill not found");
+  }
+
+  // Check authorization
+  if (
+    req.user.role === "student" &&
+    bill.userId._id.toString() !== req.user._id.toString()
+  ) {
+    throw new ApiError(403, "Not authorized to access this bill");
+  }
+
+  const settings = await Settings.getSettings();
+  const pdfBuffer = await PDFGenerator.generateBillPDF(bill, settings);
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=bill-${bill._id}.pdf`,
+  );
+  res.send(pdfBuffer);
+});
+
+module.exports = {
+  generateBills,
+  getMyBill,
+  getAllBills,
+  exportBillsCSV,
+  downloadBillPDF,
 };

@@ -9,6 +9,18 @@ export const attendanceService = {
     if (mealType) url += `mealType=${mealType}`;
     return api.get(url);
   },
-  getMyAttendance: (month, year) =>
-    api.get(`/attendance/me?month=${month}&year=${year}`),
+  getMyAttendance: (month, year) => {
+    let url = "/attendance/me";
+    if (month && year) url += `?month=${month}&year=${year}`;
+    return api.get(url);
+  },
+  // Student self-marking
+  markSelfAttendance: (data) => api.post("/attendance/self-mark", data),
+  // Manager approval
+  approveAttendance: (id) => api.patch(`/attendance/${id}/approve`),
+  getPendingAttendance: () => api.get("/attendance/pending"),
+  exportAttendanceCSV: (month, year) =>
+    api.get(`/attendance/export?month=${month}&year=${year}`, {
+      responseType: "blob",
+    }),
 };

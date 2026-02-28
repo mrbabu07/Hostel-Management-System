@@ -39,6 +39,7 @@ const register = asyncHandler(async (req, res) => {
       201,
       {
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,
@@ -80,6 +81,7 @@ const login = asyncHandler(async (req, res) => {
       200,
       {
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,

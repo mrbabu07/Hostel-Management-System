@@ -1,8 +1,27 @@
 import { useState } from "react";
-import AppLayout from "../../components/layout/AppLayout";
-import Button from "../../components/common/Button";
-import Modal from "../../components/common/Modal";
-import Input from "../../components/common/Input";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Avatar,
+  IconButton,
+} from "@mui/material";
+import { PersonAdd, Edit, ToggleOn, ToggleOff } from "@mui/icons-material";
+import { motion } from "framer-motion";
+import ModernLayout from "../../components/layout/ModernLayout";
+import ModernTable from "../../components/common/ModernTable";
 
 const UsersManage = () => {
   const [users, setUsers] = useState([
@@ -87,144 +106,209 @@ const UsersManage = () => {
     setIsModalOpen(true);
   };
 
+  const columns = [
+    {
+      field: "name",
+      headerName: "User",
+      flex: 1,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Avatar sx={{ width: 32, height: 32 }}>
+            {params.row.name.charAt(0)}
+          </Avatar>
+          <Typography variant="body2" fontWeight={500}>
+            {params.row.name}
+          </Typography>
+        </Box>
+      ),
+    },
+    { field: "email", headerName: "Email", flex: 1 },
+    {
+      field: "role",
+      headerName: "Role",
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          size="small"
+          color={params.value === "manager" ? "primary" : "default"}
+          sx={{ textTransform: "capitalize" }}
+        />
+      ),
+    },
+    {
+      field: "rollNumber",
+      headerName: "Roll Number",
+      width: 130,
+      renderCell: (params) => params.value || "N/A",
+    },
+    {
+      field: "isActive",
+      headerName: "Status",
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value ? "Active" : "Inactive"}
+          size="small"
+          color={params.value ? "success" : "default"}
+          onClick={() => toggleStatus(params.row.id)}
+          icon={params.value ? <ToggleOn /> : <ToggleOff />}
+          sx={{ cursor: "pointer" }}
+        />
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 100,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          color="primary"
+          onClick={() => handleEdit(params.row)}
+        >
+          <Edit fontSize="small" />
+        </IconButton>
+      ),
+    },
+  ];
+
   return (
-    <AppLayout>
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <Button onClick={openCreateModal}>Add User</Button>
-        </div>
+    <ModernLayout>
+      <Box>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card
+            sx={{
+              mb: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+            }}
+          >
+            <CardContent sx={{ py: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Box>
+                  <Typography variant="h4" fontWeight={700} gutterBottom>
+                    User Management 👥
+                  </Typography>
+                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                    Manage all users, roles, and permissions
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  startIcon={<PersonAdd />}
+                  onClick={openCreateModal}
+                  sx={{
+                    bgcolor: "white",
+                    color: "primary.main",
+                    "&:hover": { bgcolor: "grey.100" },
+                  }}
+                >
+                  Add User
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium">
-                  Roll Number
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{user.name}</td>
-                  <td className="px-6 py-4">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm capitalize">
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">{user.rollNumber || "N/A"}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => toggleStatus(user.id)}
-                      className={`px-2 py-1 rounded text-sm ${
-                        user.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {user.isActive ? "Active" : "Inactive"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Users Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <ModernTable columns={columns} rows={users} />
+        </motion.div>
 
-        <Modal
-          isOpen={isModalOpen}
+        {/* Modal */}
+        <Dialog
+          open={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setEditingUser(null);
           }}
-          title={editingUser ? "Edit User" : "Add User"}
+          maxWidth="sm"
+          fullWidth
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-            <Input
-              type="email"
-              label="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              required
-            />
-            <div>
-              <label className="block text-sm font-medium mb-2">Role</label>
-              <select
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="student">Student</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            {formData.role === "student" && (
-              <>
-                <Input
-                  label="Roll Number"
-                  value={formData.rollNumber}
+          <DialogTitle>{editingUser ? "Edit User" : "Add User"}</DialogTitle>
+          <form onSubmit={handleSubmit}>
+            <DialogContent>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <TextField
+                  label="Name"
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, rollNumber: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
+                  required
+                  fullWidth
                 />
-                <Input
-                  label="Room Number"
-                  value={formData.roomNumber}
+                <TextField
+                  type="email"
+                  label="Email"
+                  value={formData.email}
                   onChange={(e) =>
-                    setFormData({ ...formData, roomNumber: e.target.value })
+                    setFormData({ ...formData, email: e.target.value })
                   }
+                  required
+                  fullWidth
                 />
-              </>
-            )}
-            <Input
-              label="Phone"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-            />
-            <div className="flex gap-2 justify-end">
+                <FormControl fullWidth>
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    value={formData.role}
+                    label="Role"
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                  >
+                    <MenuItem value="student">Student</MenuItem>
+                    <MenuItem value="manager">Manager</MenuItem>
+                    <MenuItem value="admin">Admin</MenuItem>
+                  </Select>
+                </FormControl>
+                {formData.role === "student" && (
+                  <>
+                    <TextField
+                      label="Roll Number"
+                      value={formData.rollNumber}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rollNumber: e.target.value })
+                      }
+                      fullWidth
+                    />
+                    <TextField
+                      label="Room Number"
+                      value={formData.roomNumber}
+                      onChange={(e) =>
+                        setFormData({ ...formData, roomNumber: e.target.value })
+                      }
+                      fullWidth
+                    />
+                  </>
+                )}
+                <TextField
+                  label="Phone"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  fullWidth
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
               <Button
-                type="button"
-                variant="secondary"
                 onClick={() => {
                   setIsModalOpen(false);
                   setEditingUser(null);
@@ -232,12 +316,14 @@ const UsersManage = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit">{editingUser ? "Update" : "Create"}</Button>
-            </div>
+              <Button type="submit" variant="contained">
+                {editingUser ? "Update" : "Create"}
+              </Button>
+            </DialogActions>
           </form>
-        </Modal>
-      </div>
-    </AppLayout>
+        </Dialog>
+      </Box>
+    </ModernLayout>
   );
 };
 

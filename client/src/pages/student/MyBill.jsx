@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AppLayout from "../../components/layout/AppLayout";
+import ModernLayout from "../../components/layout/ModernLayout";
 import { billingService } from "../../services/billing.service";
 import { getCurrentMonth, getCurrentYear } from "../../utils/formatDate";
 
@@ -29,7 +29,7 @@ const MyBill = () => {
   };
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div className="max-w-3xl">
         <h1 className="text-3xl font-bold mb-6">My Bill</h1>
 
@@ -101,7 +101,7 @@ const MyBill = () => {
           </div>
         )}
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 
