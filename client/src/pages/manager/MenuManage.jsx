@@ -113,12 +113,17 @@ const MenuManage = () => {
   return (
     <ModernLayout>
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Menu Management</h1>
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">Menu Management</h1>
+            <p className="text-secondary-600 dark:text-secondary-400 mt-1">Create and manage daily menus</p>
+          </div>
           <Button onClick={openCreateModal}>Create Menu</Button>
         </div>
+      </div>
 
-        <div className="mb-6">
+        <div className="card p-4 mb-6">
           <Input
             type="date"
             value={selectedDate}
@@ -128,29 +133,45 @@ const MenuManage = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="card p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto" />
+            <p className="text-secondary-600 dark:text-secondary-400 mt-4">Loading menus...</p>
+          </div>
         ) : menus.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">No menus found for this date</p>
+          <div className="card p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-secondary-100 dark:bg-secondary-700 flex items-center justify-center">
+              <span className="text-4xl">🍽️</span>
+            </div>
+            <p className="text-secondary-600 dark:text-secondary-400 text-lg">No menus found for this date</p>
+            <p className="text-secondary-500 text-sm mt-2">Create a new menu to get started</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {menus.map((menu) => (
-              <div key={menu._id} className="bg-white rounded-lg shadow p-6">
+              <div key={menu._id} className="card p-6 hover:shadow-card-hover transition-shadow">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold capitalize">
-                    {menu.mealType}
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
+                      menu.mealType === 'breakfast' ? 'bg-warning-100 dark:bg-warning-500/10' :
+                      menu.mealType === 'lunch' ? 'bg-success-100 dark:bg-success-500/10' :
+                      'bg-primary-100 dark:bg-primary-500/10'
+                    }`}>
+                      {menu.mealType === 'breakfast' ? '🌅' : menu.mealType === 'lunch' ? '☀️' : '🌙'}
+                    </div>
+                    <h3 className="text-xl font-semibold capitalize text-secondary-900 dark:text-white">
+                      {menu.mealType}
+                    </h3>
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(menu)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(menu._id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-danger-600 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300 text-sm font-medium"
                     >
                       Delete
                     </button>
@@ -158,10 +179,10 @@ const MenuManage = () => {
                 </div>
                 <div className="space-y-2">
                   {menu.items.map((item, idx) => (
-                    <div key={idx} className="border-b pb-2">
-                      <p className="font-medium">{item.name}</p>
+                    <div key={idx} className="border-b border-secondary-100 dark:border-secondary-700 pb-2 last:border-0">
+                      <p className="font-medium text-secondary-900 dark:text-white">{item.name}</p>
                       {item.description && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-secondary-600 dark:text-secondary-400">
                           {item.description}
                         </p>
                       )}

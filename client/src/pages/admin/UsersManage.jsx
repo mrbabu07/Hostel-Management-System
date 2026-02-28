@@ -181,44 +181,28 @@ const UsersManage = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ py: 3 }}>
-              <Box
+          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-4xl font-bold mb-2">User Management 👥</h1>
+                <p className="text-purple-100">
+                  Manage all users, roles, and permissions
+                </p>
+              </div>
+              <Button
+                variant="contained"
+                startIcon={<PersonAdd />}
+                onClick={openCreateModal}
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  bgcolor: "white",
+                  color: "primary.main",
+                  "&:hover": { bgcolor: "grey.100" },
                 }}
               >
-                <Box>
-                  <Typography variant="h4" fontWeight={700} gutterBottom>
-                    User Management 👥
-                  </Typography>
-                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                    Manage all users, roles, and permissions
-                  </Typography>
-                </Box>
-                <Button
-                  variant="contained"
-                  startIcon={<PersonAdd />}
-                  onClick={openCreateModal}
-                  sx={{
-                    bgcolor: "white",
-                    color: "primary.main",
-                    "&:hover": { bgcolor: "grey.100" },
-                  }}
-                >
-                  Add User
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
+                Add User
+              </Button>
+            </div>
+          </div>
         </motion.div>
 
         {/* Users Table */}

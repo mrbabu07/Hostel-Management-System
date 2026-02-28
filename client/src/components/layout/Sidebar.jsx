@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { X } from "lucide-react";
 import {
   Home,
   Menu,
@@ -13,7 +14,7 @@ import {
   BarChart,
 } from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({ variant = "desktop", onClose }) => {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -57,10 +58,21 @@ const Sidebar = () => {
         : adminLinks;
 
   return (
-    <aside className="w-64 bg-gray-800 text-white min-h-screen">
-      <div className="p-4">
-        <h2 className="text-xl font-bold">Hostel Management</h2>
-        <p className="text-sm text-gray-400 capitalize">{user?.role} Portal</p>
+    <aside className="flex flex-col w-full h-full min-h-screen bg-gradient-to-b from-indigo-600 to-indigo-500 text-white lg:w-sidebar">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div>
+          <h2 className="text-xl font-bold">Hostel Management</h2>
+          <p className="text-sm text-white/80 capitalize">{user?.role} Portal</p>
+        </div>
+        {variant === "mobile" && onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-white/10 lg:hidden"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
       <nav className="mt-4">
         {links.map((link) => {
@@ -70,11 +82,12 @@ const Sidebar = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center px-4 py-3 hover:bg-gray-700 transition-colors ${
-                isActive ? "bg-gray-700 border-l-4 border-blue-500" : ""
+              onClick={variant === "mobile" ? onClose : undefined}
+              className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-colors ${
+                isActive ? "bg-white/20 font-medium" : "hover:bg-white/10"
               }`}
             >
-              <Icon className="w-5 h-5 mr-3" />
+              <Icon className="w-5 h-5 flex-shrink-0" />
               {link.label}
             </Link>
           );

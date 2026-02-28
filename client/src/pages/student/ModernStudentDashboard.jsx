@@ -1,55 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import ModernLayout from '../../components/layout/ModernLayout';
 import {
-  Box,
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
-  Chip,
-  CardMedia,
-  Skeleton,
-} from "@mui/material";
-import {
-  Restaurant,
-  Receipt,
-  Report,
-  CalendarToday,
-  TrendingUp,
-  ChatBubble,
-  CheckCircle,
-  AccessTime,
-  Payment,
-  EventAvailable,
-} from "@mui/icons-material";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import ModernLayout from "../../components/layout/ModernLayout";
-import StatsCard from "../../components/common/StatsCard";
-import { menuService } from "../../services/menu.service";
-import { billingService } from "../../services/billing.service";
-import { attendanceService } from "../../services/attendance.service";
-import { imageService } from "../../services/image.service";
-import { toISODate } from "../../utils/formatDate";
-import toast from "react-hot-toast";
+  CalendarIcon,
+  CreditCardIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ArrowTrendingUpIcon,
+  BanknotesIcon,
+} from '@heroicons/react/24/outline';
+import { menuService } from '../../services/menu.service';
+import { billingService } from '../../services/billing.service';
+import { attendanceService } from '../../services/attendance.service';
+import { toISODate } from '../../utils/formatDate';
 
 const ModernStudentDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
-    mealsThisMonth: 0,
+    attendanceCount: 0,
     currentBill: 0,
     pendingBills: 0,
-    attendanceCount: 0,
+    mealsThisMonth: 0,
   });
   const [todayMenu, setTodayMenu] = useState([]);
-  const [mealImages, setMealImages] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,389 +32,284 @@ const ModernStudentDashboard = () => {
   }, []);
 
   const fetchDashboardData = async () => {
-    setLoading(true);
     try {
-      // Fetch today's menu
-      const menuResponse = await menuService.getMenus(toISODate(new Date()));
-      const menus = menuResponse.data.menus || [];
-      setTodayMenu(menus);
+      const today = toISODate(new Date());
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
 
-      // Fetch images for menus
-      menus.forEach(async (menu) => {
-        if (menu.imageUrl) {
-          setMealImages((prev) => ({ ...prev, [menu._id]: menu.imageUrl }));
-        } else if (menu.items && menu.items.length > 0) {
-          const imageUrl = await imageService.fetchMealImage(menu.items[0].name);
-          setMealImages((prev) => ({ ...prev, [menu._id]: imageUrl }));
-        }
-      });
+      const [menuRes, billsRes, attendanceRes] = await Promise.all([
+        menuService.getMenus(today),
+        billingService.getAllBills(),
+        attendanceService.getMyAttendance(),
+      ]);
 
-      // Fetch bills
-      const billsResponse = await billingService.getAllBills();
-      const bills = billsResponse.data.bills || [];
-      const pendingBills = bills.filter((b) => b.status === "pending");
-      const currentBill = pendingBills[0]?.totalAmount || 0;
-
-      // Fetch attendance
-      const attendanceResponse = await attendanceService.getMyAttendance();
-      const attendance = attendanceResponse.data.attendance || [];
+      setTodayMenu(menuRes.data.menus || []);
+      
+      const bills = billsRes.data.bills || [];
+      const pendingBills = bills.filter((b) => b.status === 'pending');
+      const currentMonthBill = bills.find(
+        (b) => b.month === currentMonth + 1 && b.year === currentYear
+      );
+      
+      const attendance = attendanceRes.data.attendance || [];
       const thisMonth = attendance.filter((a) => {
         const date = new Date(a.date);
-        const now = new Date();
-        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
       });
 
+      const approvedAttendance = thisMonth.filter((a) => a.approved);
+
       setStats({
-        mealsThisMonth: thisMonth.length,
-        currentBill: currentBill,
+        attendanceCount: approvedAttendance.length,
+        currentBill: currentMonthBill?.totalAmount || 0,
         pendingBills: pendingBills.length,
-        attendanceCount: thisMonth.filter((a) => a.approved).length,
+        mealsThisMonth: approvedAttendance.length,
       });
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const quickActions = [
+  const statsCards = [
     {
-      title: "Mark Attendance",
-      icon: <EventAvailable />,
-      color: "success",
-      path: "/student/attendance",
+      name: 'Attendance',
+      value: stats.attendanceCount,
+      change: `${stats.mealsThisMonth} meals`,
+      changeType: 'positive',
+      icon: CheckCircleIcon,
+      color: 'success',
     },
     {
-      title: "Pay Bills",
-      icon: <Payment />,
-      color: "warning",
-      path: "/student/bill",
+      name: 'Current Bill',
+      value: `₹${stats.currentBill}`,
+      change: stats.currentBill > 0 ? 'Pay now' : 'No pending bill',
+      changeType: stats.currentBill > 0 ? 'warning' : 'neutral',
+      icon: BanknotesIcon,
+      color: 'warning',
     },
     {
-      title: "View Menu",
-      icon: <Restaurant />,
-      color: "primary",
-      path: "/student/menu",
+      name: 'Pending Bills',
+      value: stats.pendingBills,
+      change: stats.pendingBills > 0 ? 'Action required' : 'All clear',
+      changeType: stats.pendingBills > 0 ? 'warning' : 'positive',
+      icon: CreditCardIcon,
+      color: 'danger',
     },
     {
-      title: "Submit Complaint",
-      icon: <Report />,
-      color: "error",
-      path: "/student/complaints",
+      name: 'Total Meals',
+      value: stats.mealsThisMonth,
+      change: 'This month',
+      changeType: 'neutral',
+      icon: CalendarIcon,
+      color: 'primary',
     },
   ];
 
+  const getMealIcon = (mealType) => {
+    const icons = {
+      breakfast: '🌅',
+      lunch: '☀️',
+      dinner: '🌙',
+    };
+    return icons[mealType] || '🍽️';
+  };
+
   const getMealColor = (mealType) => {
     const colors = {
-      breakfast: "#F59E0B",
-      lunch: "#10B981",
-      dinner: "#8b9cff",
+      breakfast: 'from-warning-500 to-warning-600',
+      lunch: 'from-success-500 to-success-600',
+      dinner: 'from-primary-500 to-primary-600',
     };
-    return colors[mealType] || "#667eea";
+    return colors[mealType] || 'from-secondary-500 to-secondary-600';
   };
+
+  if (loading) {
+    return (
+      <ModernLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500" />
+        </div>
+      </ModernLayout>
+    );
+  }
 
   return (
     <ModernLayout>
-      <Box>
-        {/* Welcome Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
+      {/* Welcome Section */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">
+          Welcome back, {user?.name}! 👋
+        </h1>
+        <p className="text-secondary-600 dark:text-secondary-400 mt-1">
+          {new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statsCards.map((stat) => (
+          <div
+            key={stat.name}
+            className="card p-6 hover:shadow-card-hover transition-shadow cursor-pointer"
           >
-            <CardContent sx={{ py: 3 }}>
-              <Typography variant="h4" fontWeight={700} gutterBottom>
-                Welcome back, {user?.name}! 👋
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </Typography>
-            </CardContent>
-          </Card>
-        </motion.div>
+            <div className="flex items-center justify-between mb-4">
+              <div
+                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${
+                  stat.color === 'success'
+                    ? 'from-success-500 to-success-600'
+                    : stat.color === 'warning'
+                    ? 'from-warning-500 to-warning-600'
+                    : stat.color === 'danger'
+                    ? 'from-danger-500 to-danger-600'
+                    : 'from-primary-500 to-primary-600'
+                } flex items-center justify-center text-white shadow-lg`}
+              >
+                <stat.icon className="w-6 h-6" />
+              </div>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
+                {stat.value}
+              </p>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                {stat.name}
+              </p>
+              <p
+                className={`text-xs mt-2 ${
+                  stat.changeType === 'positive'
+                    ? 'text-success-600'
+                    : stat.changeType === 'warning'
+                    ? 'text-warning-600'
+                    : 'text-secondary-500'
+                }`}
+              >
+                {stat.change}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-        {/* Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Attendance This Month"
-              value={stats.attendanceCount}
-              icon={CheckCircle}
-              color="success"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Current Bill"
-              value={stats.currentBill}
-              icon={Receipt}
-              color="warning"
-              prefix="₹"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Pending Bills"
-              value={stats.pendingBills}
-              icon={Payment}
-              color="error"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Total Meals"
-              value={stats.mealsThisMonth}
-              icon={Restaurant}
-              color="primary"
-            />
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={3}>
-          {/* Today's Menu */}
-          <Grid item xs={12} md={8}>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h6" fontWeight={600}>
-                      Today's Menu
-                    </Typography>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => navigate("/student/menu")}
-                    >
-                      View Full Menu
-                    </Button>
-                  </Box>
-                  {loading ? (
-                    <Grid container spacing={2}>
-                      {[1, 2, 3].map((i) => (
-                        <Grid item xs={12} sm={4} key={i}>
-                          <Skeleton variant="rectangular" height={150} />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : todayMenu.length === 0 ? (
-                    <Box sx={{ textAlign: "center", py: 4 }}>
-                      <Restaurant sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
-                      <Typography color="text.secondary">
-                        No menu available for today
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Grid container spacing={2}>
-                      {todayMenu.map((menu) => (
-                        <Grid item xs={12} sm={4} key={menu._id}>
-                          <Card
-                            sx={{
-                              cursor: "pointer",
-                              transition: "all 0.3s",
-                              "&:hover": {
-                                transform: "translateY(-4px)",
-                                boxShadow: 4,
-                              },
-                            }}
-                            onClick={() => navigate("/student/menu")}
-                          >
-                            {mealImages[menu._id] && (
-                              <CardMedia
-                                component="img"
-                                height="120"
-                                image={mealImages[menu._id]}
-                                alt={menu.mealType}
-                                sx={{ objectFit: "cover" }}
-                              />
-                            )}
-                            <CardContent>
-                              <Chip
-                                label={menu.mealType}
-                                size="small"
-                                sx={{
-                                  bgcolor: `${getMealColor(menu.mealType)}20`,
-                                  color: getMealColor(menu.mealType),
-                                  fontWeight: 600,
-                                  textTransform: "capitalize",
-                                  mb: 1,
-                                }}
-                              />
-                              <Typography variant="body2">
-                                {menu.items?.slice(0, 2).map((item) => item.name || item).join(", ")}
-                                {menu.items?.length > 2 && "..."}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Card sx={{ mt: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Quick Actions
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {quickActions.map((action, index) => (
-                      <Grid item xs={12} sm={6} key={index}>
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Button
-                            fullWidth
-                            variant="outlined"
-                            startIcon={action.icon}
-                            color={action.color}
-                            onClick={() => navigate(action.path)}
-                            sx={{
-                              py: 1.5,
-                              justifyContent: "flex-start",
-                              borderRadius: 2,
-                            }}
-                          >
-                            {action.title}
-                          </Button>
-                        </motion.div>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-
-          {/* Pending Bills & Info */}
-          <Grid item xs={12} md={4}>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {/* Pending Bills Card */}
-              {stats.pendingBills > 0 && (
-                <Card sx={{ mb: 3 }}>
-                  <CardContent>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-                      <Avatar sx={{ bgcolor: "warning.main" }}>
-                        <Payment />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight={600}>
-                          Pending Payment
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {stats.pendingBills} bill(s) pending
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box
-                      sx={{
-                        p: 2,
-                        bgcolor: "warning.lighter",
-                        borderRadius: 2,
-                        mb: 2,
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Today's Menu */}
+        <div className="lg:col-span-2">
+          <div className="card">
+            <div className="p-6 border-b border-secondary-100 dark:border-secondary-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                  Today's Menu
+                </h2>
+                <button
+                  onClick={() => navigate('/student/menu')}
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  View All →
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              {todayMenu.length === 0 ? (
+                <div className="text-center py-12">
+                  <CalendarIcon className="w-16 h-16 mx-auto text-secondary-300 dark:text-secondary-600 mb-4" />
+                  <p className="text-secondary-600 dark:text-secondary-400">
+                    No menu available for today
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {todayMenu.map((menu) => (
+                    <div
+                      key={menu._id}
+                      className="relative overflow-hidden rounded-xl bg-gradient-to-br p-6 text-white cursor-pointer hover:scale-105 transition-transform"
+                      style={{
+                        backgroundImage: `linear-gradient(135deg, ${
+                          menu.mealType === 'breakfast'
+                            ? '#F59E0B, #D97706'
+                            : menu.mealType === 'lunch'
+                            ? '#10B981, #059669'
+                            : '#3B82F6, #2563EB'
+                        })`,
                       }}
                     >
-                      <Typography variant="h4" fontWeight={700} color="warning.main">
-                        ₹{stats.currentBill}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Current month bill
-                      </Typography>
-                    </Box>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="warning"
-                      startIcon={<Payment />}
-                      onClick={() => navigate("/student/bill")}
-                    >
-                      Pay Now
-                    </Button>
-                  </CardContent>
-                </Card>
+                      <div className="text-4xl mb-3">{getMealIcon(menu.mealType)}</div>
+                      <h3 className="text-lg font-semibold capitalize mb-2">
+                        {menu.mealType}
+                      </h3>
+                      <p className="text-sm opacity-90">
+                        {menu.items?.slice(0, 2).map((item) => item.name || item).join(', ')}
+                        {menu.items?.length > 2 && '...'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               )}
+            </div>
+          </div>
+        </div>
 
-              {/* Attendance Card */}
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-                    <Avatar sx={{ bgcolor: "success.main" }}>
-                      <CheckCircle />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Attendance
-                        </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        This month
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      p: 2,
-                      bgcolor: "success.lighter",
-                      borderRadius: 2,
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h4" fontWeight={700} color="success.main">
-                      {stats.attendanceCount}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Approved meals
-                    </Typography>
-                  </Box>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="success"
-                    startIcon={<EventAvailable />}
-                    onClick={() => navigate("/student/attendance")}
-                  >
-                    Mark Attendance
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-        </Grid>
-      </Box>
+        {/* Quick Actions & Pending Payment */}
+        <div className="space-y-6">
+          {/* Pending Payment */}
+          {stats.pendingBills > 0 && (
+            <div className="card overflow-hidden">
+              <div className="bg-gradient-to-br from-warning-500 to-warning-600 p-6 text-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <CreditCardIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-90">Pending Payment</p>
+                    <p className="text-2xl font-bold">₹{stats.currentBill}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/student/bill')}
+                  className="w-full bg-white text-warning-600 py-2.5 rounded-lg font-medium hover:bg-warning-50 transition-colors"
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
+              Quick Actions
+            </h3>
+            <div className="space-y-2">
+              <button
+                onClick={() => navigate('/student/attendance')}
+                className="w-full btn-secondary justify-start"
+              >
+                <CheckCircleIcon className="w-5 h-5" />
+                Mark Attendance
+              </button>
+              <button
+                onClick={() => navigate('/student/menu')}
+                className="w-full btn-secondary justify-start"
+              >
+                <CalendarIcon className="w-5 h-5" />
+                View Menu
+              </button>
+              <button
+                onClick={() => navigate('/student/complaints')}
+                className="w-full btn-secondary justify-start"
+              >
+                <ClockIcon className="w-5 h-5" />
+                Submit Complaint
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </ModernLayout>
   );
 };

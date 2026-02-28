@@ -178,38 +178,24 @@ const Chat = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ py: 3 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <ChatBubble sx={{ fontSize: 40 }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h4" fontWeight={700}>
-                    Chat 💬
-                  </Typography>
-                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                    Connect with mess manager
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Circle
-                    sx={{
-                      fontSize: 12,
-                      color: online ? "#4ade80" : "#ef4444",
-                    }}
-                  />
-                  <Typography variant="body2">
-                    {online ? "Online" : "Offline"}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+            <div className="flex items-center gap-4">
+              <ChatBubble sx={{ fontSize: 40 }} />
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold mb-2">Chat 💬</h1>
+                <p className="text-purple-100">Connect with mess manager</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Circle
+                  sx={{
+                    fontSize: 12,
+                    color: online ? "#4ade80" : "#ef4444",
+                  }}
+                />
+                <span className="text-sm">{online ? "Online" : "Offline"}</span>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Chat Container */}

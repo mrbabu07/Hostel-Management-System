@@ -84,22 +84,12 @@ const ModernManagerDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ py: 3 }}>
-              <Typography variant="h4" fontWeight={700} gutterBottom>
-                Manager Dashboard 👨‍🍳
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Welcome back, {user?.name}! Here's your mess overview for today.
-              </Typography>
-            </CardContent>
-          </Card>
+          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+            <h1 className="text-4xl font-bold mb-2">Manager Dashboard 👨‍🍳</h1>
+            <p className="text-purple-100">
+              Welcome back, {user?.name}! Here's your mess overview for today.
+            </p>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}

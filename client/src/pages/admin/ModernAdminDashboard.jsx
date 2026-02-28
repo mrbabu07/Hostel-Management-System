@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -30,25 +30,103 @@ import ModernLayout from "../../components/layout/ModernLayout";
 import StatsCard from "../../components/common/StatsCard";
 import ModernLineChart from "../../components/charts/ModernLineChart";
 import ModernDoughnutChart from "../../components/charts/ModernDoughnutChart";
+import { usersService } from "../../services/users.service";
+import { billingService } from "../../services/billing.service";
+import { complaintsService } from "../../services/complaints.service";
+import { attendanceService } from "../../services/attendance.service";
 
 const ModernAdminDashboard = () => {
   const { user } = useAuth();
-
-  const stats = {
-    totalUsers: 275,
-    monthlyRevenue: 562500,
-    activeComplaints: 12,
-    resolvedComplaints: 45,
-    attendanceRate: 94,
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    monthlyRevenue: 0,
+    activeComplaints: 0,
+    resolvedComplaints: 0,
+    attendanceRate: 0,
     satisfactionRate: 87,
+  });
+  const [recentUsers, setRecentUsers] = useState([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch users (admin only)
+      try {
+        const usersRes = await usersService.getAllUsers();
+        const users = usersRes.data.users || usersRes.data || [];
+        setStats(prev => ({ ...prev, totalUsers: users.length }));
+        setRecentUsers(users.slice(0, 4).map(u => ({
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          status: 'Active',
+        })));
+      } catch (error) {
+        console.log('Users data not available');
+      }
+
+      // Fetch billing data
+      try {
+        const billsRes = await billingService.getAllBills();
+        const bills = billsRes.data.bills || [];
+        const currentMonth = new Date().getMonth() + 1;
+        const currentYear = new Date().getFullYear();
+        const monthlyBills = bills.filter(b => b.month === currentMonth && b.year === currentYear);
+        const revenue = monthlyBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+        setStats(prev => ({ ...prev, monthlyRevenue: revenue }));
+      } catch (error) {
+        console.log('Billing data not available');
+      }
+
+      // Fetch complaints
+      try {
+        const complaintsRes = await complaintsService.getAllComplaints();
+        const complaints = complaintsRes.data || [];
+        const active = complaints.filter(c => c.status === 'pending' || c.status === 'in-progress').length;
+        const resolved = complaints.filter(c => c.status === 'resolved').length;
+        setStats(prev => ({ 
+          ...prev, 
+          activeComplaints: active,
+          resolvedComplaints: resolved 
+        }));
+      } catch (error) {
+        console.log('Complaints data not available');
+      }
+
+      // Fetch attendance
+      try {
+        const attendanceRes = await attendanceService.getAllAttendance();
+        const attendance = attendanceRes.data.attendance || [];
+        const today = new Date().toISOString().split('T')[0];
+        const todayAttendance = attendance.filter(a => 
+          a.date.startsWith(today) && a.approved
+        );
+        const totalStudents = stats.totalUsers || 100;
+        const rate = totalStudents > 0 ? Math.round((todayAttendance.length / totalStudents) * 100) : 0;
+        setStats(prev => ({ ...prev, attendanceRate: rate }));
+      } catch (error) {
+        console.log('Attendance data not available');
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Revenue trend data (last 6 months)
-  const revenueData = [450000, 480000, 520000, 510000, 540000, 562500];
+  const revenueData = [450000, 480000, 520000, 510000, 540000, stats.monthlyRevenue];
   const revenueLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
   // Complaint distribution
-  const complaintData = [15, 25, 10, 5];
+  const complaintData = [stats.activeComplaints, 25, 10, 5];
   const complaintLabels = [
     "Food Quality",
     "Room Issues",
@@ -56,7 +134,7 @@ const ModernAdminDashboard = () => {
     "Other",
   ];
 
-  const recentUsers = [
+  const recentUsersData = recentUsers.length > 0 ? recentUsers : [
     {
       name: "John Doe",
       email: "john@example.com",
@@ -112,22 +190,12 @@ const ModernAdminDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ py: 3 }}>
-              <Typography variant="h4" fontWeight={700} gutterBottom>
-                Admin Dashboard 👨‍💼
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Welcome back, {user?.name}! Here's your system overview.
-              </Typography>
-            </CardContent>
-          </Card>
+          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+            <h1 className="text-4xl font-bold mb-2">Admin Dashboard 👨‍💼</h1>
+            <p className="text-purple-100">
+              Welcome back, {user?.name}! Here's your system overview.
+            </p>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}
@@ -239,7 +307,7 @@ const ModernAdminDashboard = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {recentUsers.map((user, index) => (
+                        {recentUsersData.map((user, index) => (
                           <TableRow
                             key={index}
                             sx={{

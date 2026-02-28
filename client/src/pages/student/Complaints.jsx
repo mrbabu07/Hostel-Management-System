@@ -69,54 +69,65 @@ const Complaints = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: "bg-yellow-100 text-yellow-800",
-      "in-progress": "bg-blue-100 text-blue-800",
-      resolved: "bg-green-100 text-green-800",
+      pending: "badge-warning",
+      "in-progress": "badge-primary",
+      resolved: "badge-success",
     };
-    return colors[status] || "bg-gray-100 text-gray-800";
+    return colors[status] || "badge bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300";
   };
 
   return (
     <ModernLayout>
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">My Complaints</h1>
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">My Complaints</h1>
+            <p className="text-secondary-600 dark:text-secondary-400 mt-1">Submit and track your complaints</p>
+          </div>
           <Button onClick={() => setIsModalOpen(true)}>New Complaint</Button>
         </div>
+      </div>
 
         {complaints.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">No complaints yet</p>
+          <div className="card p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-secondary-100 dark:bg-secondary-700 flex items-center justify-center">
+              <span className="text-4xl">📋</span>
+            </div>
+            <p className="text-secondary-600 dark:text-secondary-400 text-lg">No complaints yet</p>
+            <p className="text-secondary-500 text-sm mt-2">Submit your first complaint to get started</p>
           </div>
         ) : (
           <div className="space-y-4">
             {complaints.map((complaint) => (
               <div
                 key={complaint._id}
-                className="bg-white rounded-lg shadow p-6"
+                className="card p-6 hover:shadow-card-hover transition-shadow"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold">{complaint.title}</h3>
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">{complaint.title}</h3>
                   <span
-                    className={`px-3 py-1 rounded text-sm ${getStatusColor(complaint.status)}`}
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(complaint.status)}`}
                   >
                     {complaint.status}
                   </span>
                 </div>
-                <p className="text-gray-600 mb-2">{complaint.description}</p>
-                <div className="flex gap-4 text-sm text-gray-500">
-                  <span className="capitalize">
-                    Category: {complaint.category}
+                <p className="text-secondary-600 dark:text-secondary-400 mb-3">{complaint.description}</p>
+                <div className="flex flex-wrap gap-4 text-sm text-secondary-500">
+                  <span className="capitalize flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-primary-500"></span>
+                    {complaint.category}
                   </span>
-                  <span className="capitalize">
-                    Priority: {complaint.priority}
+                  <span className="capitalize flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-warning-500"></span>
+                    {complaint.priority}
                   </span>
                   <span>{formatDateTime(complaint.createdAt)}</span>
                 </div>
                 {complaint.adminNotes && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded">
-                    <p className="text-sm font-medium">Admin Notes:</p>
-                    <p className="text-sm">{complaint.adminNotes}</p>
+                  <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-500/10 rounded-lg border-l-4 border-primary-500">
+                    <p className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-1">Admin Notes:</p>
+                    <p className="text-sm text-primary-700 dark:text-primary-300">{complaint.adminNotes}</p>
                   </div>
                 )}
               </div>

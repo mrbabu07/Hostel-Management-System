@@ -136,22 +136,12 @@ const MenuView = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ py: 3 }}>
-              <Typography variant="h4" fontWeight={700} gutterBottom>
-                Today's Menu 🍽️
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Check what's cooking for you today
-              </Typography>
-            </CardContent>
-          </Card>
+          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+            <h1 className="text-4xl font-bold mb-2">Today's Menu 🍽️</h1>
+            <p className="text-purple-100">
+              Check what's cooking for you today
+            </p>
+          </div>
         </motion.div>
 
         {/* Date Selector */}

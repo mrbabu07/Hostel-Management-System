@@ -1,6 +1,0 @@
-@echo off
-echo Clearing Vite cache and restarting...
-if exist "node_modules\.vite" rmdir /s /q "node_modules\.vite"
-echo Cache cleared!
-echo Starting dev server with clean cache...
-npm run dev -- --force

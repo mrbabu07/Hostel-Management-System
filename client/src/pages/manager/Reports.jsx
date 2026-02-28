@@ -50,27 +50,17 @@ const Reports = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card
-            sx={{
-              mb: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <CardContent sx={{ py: 3 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Assessment sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography variant="h4" fontWeight={700}>
-                    Reports & Analytics 📊
-                  </Typography>
-                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                    Generate and download comprehensive reports
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+            <div className="flex items-center gap-4">
+              <Assessment sx={{ fontSize: 40 }} />
+              <div>
+                <h1 className="text-4xl font-bold mb-2">Reports & Analytics 📊</h1>
+                <p className="text-purple-100">
+                  Generate and download comprehensive reports
+                </p>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}

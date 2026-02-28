@@ -1,325 +1,162 @@
-import { useState } from "react";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  Avatar,
-  Typography,
-  Chip,
-  Collapse,
-  Divider,
-} from "@mui/material";
-import {
-  Dashboard,
-  Restaurant,
-  Receipt,
-  Report,
-  ChatBubble,
-  Notifications,
-  AccountCircle,
-  ExpandLess,
-  ExpandMore,
-  CalendarToday,
-  CheckCircle,
-  People,
-  Analytics,
-  Settings,
-  Inventory,
-  Feedback,
-  Assessment,
-  Home,
-} from "@mui/icons-material";
-import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+  HomeIcon,
+  UsersIcon,
+  CalendarIcon,
+  CreditCardIcon,
+  ChatBubbleLeftIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
+  XMarkIcon,
+  ChartBarIcon,
+  ClipboardDocumentListIcon,
+  BellAlertIcon,
+} from '@heroicons/react/24/outline';
 
-const drawerWidth = 280;
-
-const ModernSidebar = ({ open, onClose, isMobile }) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+const ModernSidebar = ({ isOpen, onClose }) => {
+  const { user, logout } = useAuth();
   const location = useLocation();
-  const [openMenus, setOpenMenus] = useState({});
+  const navigate = useNavigate();
 
-  const handleMenuClick = (key) => {
-    setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
-  const handleNavigation = (path) => {
-    navigate(path);
-    if (isMobile) {
-      onClose();
-    }
+  const navigation = {
+    student: [
+      { name: 'Home', href: '/home', icon: HomeIcon },
+      { name: 'Dashboard', href: '/student/dashboard', icon: ChartBarIcon },
+      { name: 'Menu', href: '/student/menu', icon: CalendarIcon },
+      { name: 'Attendance', href: '/student/attendance', icon: UsersIcon },
+      { name: 'My Bills', href: '/student/bill', icon: CreditCardIcon },
+      { name: 'Chat', href: '/student/chat', icon: ChatBubbleLeftIcon },
+      { name: 'Complaints', href: '/student/complaints', icon: BellAlertIcon },
+      { name: 'Notices', href: '/student/notices', icon: ClipboardDocumentListIcon },
+      { name: 'Profile', href: '/student/profile', icon: Cog6ToothIcon },
+    ],
+    manager: [
+      { name: 'Home', href: '/home', icon: HomeIcon },
+      { name: 'Dashboard', href: '/manager/dashboard', icon: ChartBarIcon },
+      { name: 'Menu Management', href: '/manager/menu', icon: CalendarIcon },
+      { name: 'Attendance Approval', href: '/manager/attendance', icon: UsersIcon },
+      { name: 'Chat', href: '/manager/chat', icon: ChatBubbleLeftIcon },
+      { name: 'Feedback', href: '/manager/feedback', icon: BellAlertIcon },
+      { name: 'Reports', href: '/manager/reports', icon: ClipboardDocumentListIcon },
+      { name: 'Inventory', href: '/manager/inventory', icon: Cog6ToothIcon },
+    ],
+    admin: [
+      { name: 'Home', href: '/home', icon: HomeIcon },
+      { name: 'Dashboard', href: '/admin/dashboard', icon: ChartBarIcon },
+      { name: 'Users Management', href: '/admin/users', icon: UsersIcon },
+      { name: 'Billing', href: '/admin/billing', icon: CreditCardIcon },
+      { name: 'Chat', href: '/admin/chat', icon: ChatBubbleLeftIcon },
+      { name: 'Complaints', href: '/admin/complaints', icon: BellAlertIcon },
+      { name: 'Notices', href: '/admin/notices', icon: ClipboardDocumentListIcon },
+      { name: 'Analytics', href: '/admin/analytics', icon: CalendarIcon },
+      { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
+    ],
   };
 
-  const isActive = (path) => location.pathname === path;
-
-  const studentMenuItems = [
-    { text: "Home", icon: <Home />, path: "/home" },
-    { text: "Dashboard", icon: <Dashboard />, path: "/student/dashboard" },
-    {
-      text: "Meals",
-      icon: <Restaurant />,
-      key: "meals",
-      submenu: [
-        { text: "View Menu", icon: <Restaurant />, path: "/student/menu" },
-        {
-          text: "My Selection",
-          icon: <CheckCircle />,
-          path: "/student/meal-confirm",
-        },
-        {
-          text: "Attendance",
-          icon: <CalendarToday />,
-          path: "/student/attendance",
-        },
-      ],
-    },
-    { text: "Billing", icon: <Receipt />, path: "/student/bill" },
-    { text: "Complaints", icon: <Report />, path: "/student/complaints" },
-    { text: "Chat", icon: <ChatBubble />, path: "/student/chat" },
-    { text: "Notices", icon: <Notifications />, path: "/student/notices" },
-    { text: "Feedback", icon: <Feedback />, path: "/student/feedback" },
-    { text: "Profile", icon: <AccountCircle />, path: "/student/profile" },
-  ];
-
-  const managerMenuItems = [
-    { text: "Home", icon: <Home />, path: "/home" },
-    { text: "Dashboard", icon: <Dashboard />, path: "/manager/dashboard" },
-    { text: "Menu Management", icon: <Restaurant />, path: "/manager/menu" },
-    {
-      text: "Mark Attendance",
-      icon: <CheckCircle />,
-      path: "/manager/attendance",
-    },
-    {
-      text: "Attendance Report",
-      icon: <Assessment />,
-      path: "/manager/attendance-report",
-    },
-    { text: "Inventory", icon: <Inventory />, path: "/manager/inventory" },
-    { text: "Feedback", icon: <Feedback />, path: "/manager/feedback" },
-    { text: "Chat", icon: <ChatBubble />, path: "/manager/chat" },
-    { text: "Reports", icon: <Analytics />, path: "/manager/reports" },
-  ];
-
-  const adminMenuItems = [
-    { text: "Home", icon: <Home />, path: "/home" },
-    { text: "Dashboard", icon: <Dashboard />, path: "/admin/dashboard" },
-    { text: "User Management", icon: <People />, path: "/admin/users" },
-    { text: "Complaints", icon: <Report />, path: "/admin/complaints" },
-    { text: "Notices", icon: <Notifications />, path: "/admin/notices" },
-    { text: "Billing", icon: <Receipt />, path: "/admin/billing" },
-    { text: "Chat", icon: <ChatBubble />, path: "/admin/chat" },
-    { text: "Analytics", icon: <Analytics />, path: "/admin/analytics" },
-    { text: "Settings", icon: <Settings />, path: "/admin/settings" },
-  ];
-
-  const getMenuItems = () => {
-    switch (user?.role) {
-      case "student":
-        return studentMenuItems;
-      case "manager":
-        return managerMenuItems;
-      case "admin":
-        return adminMenuItems;
-      default:
-        return studentMenuItems;
-    }
-  };
-
-  const menuItems = getMenuItems();
-
-  const renderMenuItem = (item, index) => {
-    if (item.submenu) {
-      return (
-        <Box key={item.key}>
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => handleMenuClick(item.key)}
-              sx={{
-                borderRadius: 3,
-                mx: 1,
-                mb: 0.5,
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-              {openMenus[item.key] ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-          </ListItem>
-          <Collapse in={openMenus[item.key]} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {item.submenu.map((subItem, subIndex) => (
-                <ListItem key={subIndex} disablePadding>
-                  <ListItemButton
-                    onClick={() => handleNavigation(subItem.path)}
-                    sx={{
-                      borderRadius: 3,
-                      mx: 1,
-                      mb: 0.5,
-                      pl: 4,
-                      color: "white",
-                      backgroundColor: isActive(subItem.path)
-                        ? "rgba(255, 255, 255, 0.2)"
-                        : "transparent",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 0.1)",
-                      },
-                    }}
-                  >
-                    <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-                      {subItem.icon}
-                    </ListItemIcon>
-                    <ListItemText primary={subItem.text} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Collapse>
-        </Box>
-      );
-    }
-
-    return (
-      <motion.div
-        key={index}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
-      >
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => handleNavigation(item.path)}
-            sx={{
-              borderRadius: 3,
-              mx: 1,
-              mb: 0.5,
-              color: "white",
-              backgroundColor: isActive(item.path)
-                ? "rgba(255, 255, 255, 0.2)"
-                : "transparent",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              },
-              transition: "all 0.3s ease",
-            }}
-          >
-            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-              <motion.div
-                whileHover={{ scale: 1.2, rotate: 5 }}
-                transition={{ duration: 0.2 }}
-              >
-                {item.icon}
-              </motion.div>
-            </ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItemButton>
-        </ListItem>
-      </motion.div>
-    );
-  };
-
-  const drawerContent = (
-    <Box
-      sx={{
-        height: "100%",
-        background: "linear-gradient(180deg, #667eea 0%, #764ba2 100%)",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* User Profile Section */}
-      <Box
-        sx={{
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1.5,
-          mt: 8,
-        }}
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5, type: "spring" }}
-        >
-          <Avatar
-            alt={user?.name}
-            src={user?.profileImage}
-            sx={{
-              width: 80,
-              height: 80,
-              border: "3px solid white",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            {user?.name?.charAt(0).toUpperCase()}
-          </Avatar>
-        </motion.div>
-        <Box textAlign="center">
-          <Typography variant="h6" fontWeight={600}>
-            {user?.name}
-          </Typography>
-          <Chip
-            label={user?.role?.toUpperCase()}
-            size="small"
-            sx={{
-              mt: 0.5,
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              color: "white",
-              fontWeight: 600,
-              fontSize: "0.75rem",
-            }}
-          />
-        </Box>
-      </Box>
-
-      <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.2)", my: 2 }} />
-
-      {/* Menu Items */}
-      <List sx={{ flex: 1, overflowY: "auto", px: 1 }}>
-        {menuItems.map((item, index) => renderMenuItem(item, index))}
-      </List>
-
-      {/* Footer */}
-      <Box sx={{ p: 2, textAlign: "center" }}>
-        <Typography variant="caption" sx={{ opacity: 0.7 }}>
-          © 2024 Hostel Management
-        </Typography>
-      </Box>
-    </Box>
-  );
+  const currentNav = navigation[user?.role] || [];
 
   return (
-    <Drawer
-      variant={isMobile ? "temporary" : "permanent"}
-      open={isMobile ? open : true}
-      onClose={onClose}
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-          border: "none",
-        },
-      }}
-    >
-      {drawerContent}
-    </Drawer>
+    <>
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-secondary-800 border-r border-secondary-200 dark:border-secondary-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo Section */}
+          <div className="flex items-center justify-between h-20 px-6 border-b border-secondary-200 dark:border-secondary-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <span className="text-white font-bold text-lg">H</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  Hostel MS
+                </h1>
+                <p className="text-xs text-secondary-500 capitalize">{user?.role} Portal</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="lg:hidden p-2 text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-200 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            {currentNav.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => onClose()}
+                  className={`group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
+                      : 'text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 hover:text-secondary-900 dark:hover:text-white'
+                  }`}
+                >
+                  <item.icon
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      isActive ? '' : 'group-hover:scale-110'
+                    }`}
+                  />
+                  <span>{item.name}</span>
+                  {isActive && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User Profile Section */}
+          <div className="p-4 border-t border-secondary-200 dark:border-secondary-700 bg-secondary-50 dark:bg-secondary-900/50">
+            <div className="flex items-center gap-3 p-3 mb-3 rounded-xl bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/30">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success-500 border-2 border-white dark:border-secondary-800 rounded-full" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-secondary-900 dark:text-white truncate">
+                  {user?.name}
+                </p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-500/10 rounded-xl transition-all duration-200 group"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Logout
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-secondary-900/50 backdrop-blur-sm lg:hidden"
+          onClick={onClose}
+        />
+      )}
+    </>
   );
 };
 

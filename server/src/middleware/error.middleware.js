@@ -1,4 +1,18 @@
 const ApiError = require("../utils/ApiError");
+const { validationResult } = require("express-validator");
+
+// Validation middleware
+const validateRequest = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation Error",
+      errors: errors.array(),
+    });
+  }
+  next();
+};
 
 const errorHandler = (err, req, res, next) => {
   let error = err;
@@ -39,4 +53,4 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = errorHandler;
+module.exports = { errorHandler, validateRequest };

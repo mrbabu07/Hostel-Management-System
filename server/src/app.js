@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
-const errorHandler = require("./middleware/error.middleware");
+const { errorHandler } = require("./middleware/error.middleware");
 const requestId = require("./middleware/requestId.middleware");
 const loggingMiddleware = require("./middleware/logging.middleware");
 const {
@@ -26,6 +26,8 @@ const auditRoutes = require("./routes/audit.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const messageRoutes = require("./routes/message.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const usersRoutes = require("./routes/users.routes");
+const inventoryRoutes = require("./routes/inventory.routes");
 
 const app = express();
 
@@ -83,6 +85,7 @@ app.get("/health", (req, res) => {
 
 // API Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/menus", menuRoutes);
 app.use("/api/v1/meal-plans", mealPlanRoutes);
 app.use("/api/v1/attendance", attendanceRoutes);
@@ -95,6 +98,7 @@ app.use("/api/v1/audit", auditRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/messages", messageRoutes);
 app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/inventory", inventoryRoutes);
 
 // 404 handler
 app.use((req, res) => {
