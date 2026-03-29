@@ -12,6 +12,7 @@ import {
   ChartBarIcon,
   ClipboardDocumentListIcon,
   BellAlertIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const ModernSidebar = ({ isOpen, onClose }) => {
@@ -55,6 +56,7 @@ const ModernSidebar = ({ isOpen, onClose }) => {
       { name: 'Complaints', href: '/admin/complaints', icon: BellAlertIcon },
       { name: 'Notices', href: '/admin/notices', icon: ClipboardDocumentListIcon },
       { name: 'Analytics', href: '/admin/analytics', icon: CalendarIcon },
+      { name: 'Audit Logs', href: '/admin/audit-logs', icon: ShieldCheckIcon },
       { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
     ],
   };
@@ -65,19 +67,19 @@ const ModernSidebar = ({ isOpen, onClose }) => {
     <>
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-secondary-800 border-r border-secondary-200 dark:border-secondary-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-2xl border-r border-secondary-200/50 dark:border-secondary-700/50 shadow-premium transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo Section */}
-          <div className="flex items-center justify-between h-20 px-6 border-b border-secondary-200 dark:border-secondary-700">
+          <div className="flex items-center justify-between h-20 px-6 border-b border-secondary-200/50 dark:border-secondary-700/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-premium animate-pulse-glow">
                 <span className="text-white font-bold text-lg">H</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold gradient-text">
                   Hostel MS
                 </h1>
                 <p className="text-xs text-secondary-500 capitalize">{user?.role} Portal</p>
@@ -85,7 +87,7 @@ const ModernSidebar = ({ isOpen, onClose }) => {
             </div>
             <button
               onClick={onClose}
-              className="lg:hidden p-2 text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-200 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
+              className="lg:hidden p-2 text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-200 rounded-lg hover:bg-secondary-100/50 dark:hover:bg-secondary-700/50 transition-all duration-300 hover:scale-110"
             >
               <XMarkIcon className="w-5 h-5" />
             </button>
@@ -100,20 +102,20 @@ const ModernSidebar = ({ isOpen, onClose }) => {
                   key={item.name}
                   to={item.href}
                   onClick={() => onClose()}
-                  className={`group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  className={`group flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
                     isActive
-                      ? 'bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
-                      : 'text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 hover:text-secondary-900 dark:hover:text-white'
+                      ? 'bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 text-white shadow-premium hover:shadow-premium-lg transform hover:scale-105'
+                      : 'text-secondary-600 dark:text-secondary-400 hover:bg-white/60 dark:hover:bg-secondary-700/60 hover:text-secondary-900 dark:hover:text-white backdrop-blur-lg hover:shadow-lg transform hover:scale-105'
                   }`}
                 >
                   <item.icon
-                    className={`w-5 h-5 transition-transform duration-200 ${
-                      isActive ? '' : 'group-hover:scale-110'
+                    className={`w-5 h-5 transition-transform duration-300 ${
+                      isActive ? '' : 'group-hover:scale-125 group-hover:rotate-6'
                     }`}
                   />
                   <span>{item.name}</span>
                   {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   )}
                 </Link>
               );
@@ -121,13 +123,13 @@ const ModernSidebar = ({ isOpen, onClose }) => {
           </nav>
 
           {/* User Profile Section */}
-          <div className="p-4 border-t border-secondary-200 dark:border-secondary-700 bg-secondary-50 dark:bg-secondary-900/50">
-            <div className="flex items-center gap-3 p-3 mb-3 rounded-xl bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700">
+          <div className="p-4 border-t border-secondary-200/50 dark:border-secondary-700/50 bg-gradient-to-br from-secondary-50/80 to-violet-50/30 dark:from-secondary-900/80 dark:to-violet-950/30 backdrop-blur-lg">
+            <div className="flex items-center gap-3 p-3 mb-3 rounded-xl bg-white/80 dark:bg-secondary-800/80 backdrop-blur-lg border border-secondary-200/50 dark:border-secondary-700/50 shadow-lg hover:shadow-premium transition-all duration-300 hover:scale-105">
               <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/30">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-premium animate-gradient">
                   {user?.name?.charAt(0).toUpperCase()}
                 </div>
-                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success-500 border-2 border-white dark:border-secondary-800 rounded-full" />
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success-500 border-2 border-white dark:border-secondary-800 rounded-full animate-pulse" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-secondary-900 dark:text-white truncate">
@@ -140,7 +142,7 @@ const ModernSidebar = ({ isOpen, onClose }) => {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-500/10 rounded-xl transition-all duration-200 group"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-danger-600 dark:text-danger-400 hover:bg-danger-50/80 dark:hover:bg-danger-500/20 backdrop-blur-lg rounded-xl transition-all duration-300 group hover:shadow-lg transform hover:scale-105"
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               Logout
@@ -152,7 +154,7 @@ const ModernSidebar = ({ isOpen, onClose }) => {
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-secondary-900/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-secondary-900/50 backdrop-blur-md lg:hidden transition-all duration-300"
           onClick={onClose}
         />
       )}

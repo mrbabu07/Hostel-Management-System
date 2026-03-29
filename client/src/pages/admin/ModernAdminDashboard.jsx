@@ -1,35 +1,15 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Avatar,
-  LinearProgress,
-} from "@mui/material";
-import {
-  People,
-  Receipt,
-  Report,
-  TrendingUp,
-  CheckCircle,
-  Warning,
-} from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import ModernLayout from "../../components/layout/ModernLayout";
-import StatsCard from "../../components/common/StatsCard";
-import ModernLineChart from "../../components/charts/ModernLineChart";
-import ModernDoughnutChart from "../../components/charts/ModernDoughnutChart";
+import {
+  UsersIcon,
+  CreditCardIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+} from '@heroicons/react/24/outline';
 import { usersService } from "../../services/users.service";
 import { billingService } from "../../services/billing.service";
 import { complaintsService } from "../../services/complaints.service";
@@ -121,17 +101,55 @@ const ModernAdminDashboard = () => {
     }
   };
 
-  // Revenue trend data (last 6 months)
-  const revenueData = [450000, 480000, 520000, 510000, 540000, stats.monthlyRevenue];
-  const revenueLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-
-  // Complaint distribution
-  const complaintData = [stats.activeComplaints, 25, 10, 5];
-  const complaintLabels = [
-    "Food Quality",
-    "Room Issues",
-    "Maintenance",
-    "Other",
+  const statsCards = [
+    {
+      title: "Total Users",
+      value: stats.totalUsers,
+      icon: UsersIcon,
+      color: "from-blue-500 to-blue-600",
+      trend: "+8%",
+      trendUp: true,
+    },
+    {
+      title: "Monthly Revenue",
+      value: `₹${stats.monthlyRevenue.toLocaleString()}`,
+      icon: CreditCardIcon,
+      color: "from-emerald-500 to-teal-600",
+      trend: "+4.2%",
+      trendUp: true,
+    },
+    {
+      title: "Active Complaints",
+      value: stats.activeComplaints,
+      icon: ExclamationTriangleIcon,
+      color: "from-rose-500 to-red-600",
+      trend: "",
+      trendUp: false,
+    },
+    {
+      title: "Resolved",
+      value: stats.resolvedComplaints,
+      icon: CheckCircleIcon,
+      color: "from-emerald-500 to-green-600",
+      trend: "",
+      trendUp: true,
+    },
+    {
+      title: "Attendance",
+      value: `${stats.attendanceRate}%`,
+      icon: ChartBarIcon,
+      color: "from-violet-500 to-purple-600",
+      trend: "",
+      trendUp: true,
+    },
+    {
+      title: "Satisfaction",
+      value: `${stats.satisfactionRate}%`,
+      icon: ArrowTrendingUpIcon,
+      color: "from-amber-500 to-orange-600",
+      trend: "",
+      trendUp: true,
+    },
   ];
 
   const recentUsersData = recentUsers.length > 0 ? recentUsers : [
@@ -168,269 +186,166 @@ const ModernAdminDashboard = () => {
     { metric: "Storage Usage", value: 65, status: "warning" },
   ];
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "excellent":
-        return "success";
-      case "good":
-        return "info";
-      case "warning":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
+  if (loading) {
+    return (
+      <ModernLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500" />
+        </div>
+      </ModernLayout>
+    );
+  }
 
   return (
     <ModernLayout>
-      <Box>
-        {/* Welcome Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="mb-6 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-purple-500/30">
+      {/* Welcome Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="mb-8 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-premium-lg animate-gradient" style={{ backgroundSize: '200% 200%' }}>
+          <div className="relative z-10">
             <h1 className="text-4xl font-bold mb-2">Admin Dashboard 👨‍💼</h1>
-            <p className="text-purple-100">
+            <p className="text-purple-100 text-lg">
               Welcome back, {user?.name}! Here's your system overview.
             </p>
           </div>
-        </motion.div>
+        </div>
+      </motion.div>
 
-        {/* Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={2}>
-            <StatsCard
-              title="Total Users"
-              value={stats.totalUsers}
-              icon={People}
-              color="primary"
-              trend="up"
-              trendValue="+8%"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <StatsCard
-              title="Monthly Revenue"
-              value={stats.monthlyRevenue}
-              icon={Receipt}
-              color="success"
-              prefix="₹"
-              trend="up"
-              trendValue="+4.2%"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <StatsCard
-              title="Active Complaints"
-              value={stats.activeComplaints}
-              icon={Report}
-              color="error"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <StatsCard
-              title="Resolved"
-              value={stats.resolvedComplaints}
-              icon={CheckCircle}
-              color="success"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <StatsCard
-              title="Attendance"
-              value={stats.attendanceRate}
-              icon={TrendingUp}
-              color="info"
-              suffix="%"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <StatsCard
-              title="Satisfaction"
-              value={stats.satisfactionRate}
-              icon={TrendingUp}
-              color="warning"
-              suffix="%"
-            />
-          </Grid>
-        </Grid>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+        {statsCards.map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <div className="glass-card p-6 hover-lift hover-glow cursor-pointer">
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shadow-premium mb-4 animate-gradient`}>
+                <stat.icon className="w-6 h-6" />
+              </div>
+              <p className="text-2xl font-bold gradient-text mb-1">
+                {stat.value}
+              </p>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 font-medium">
+                {stat.title}
+              </p>
+              {stat.trend && (
+                <p className={`text-xs mt-2 font-semibold ${stat.trendUp ? 'text-success-600' : 'text-danger-600'}`}>
+                  {stat.trend}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
-        <Grid container spacing={3}>
-          {/* Revenue Chart */}
-          <Grid item xs={12} md={8}>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <ModernLineChart
-                title="Revenue Trend (Last 6 Months)"
-                data={revenueData}
-                labels={revenueLabels}
-                label="Revenue (₹)"
-              />
-            </motion.div>
-
-            {/* Recent Users Table */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Card sx={{ mt: 3 }}>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h6" fontWeight={600}>
-                      Recent Users
-                    </Typography>
-                    <Button size="small" variant="outlined">
-                      View All
-                    </Button>
-                  </Box>
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>User</TableCell>
-                          <TableCell>Email</TableCell>
-                          <TableCell>Role</TableCell>
-                          <TableCell>Status</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {recentUsersData.map((user, index) => (
-                          <TableRow
-                            key={index}
-                            sx={{
-                              "&:hover": {
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            <TableCell>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <Avatar sx={{ width: 32, height: 32 }}>
-                                  {user.name.charAt(0)}
-                                </Avatar>
-                                <Typography variant="body2" fontWeight={500}>
-                                  {user.name}
-                                </Typography>
-                              </Box>
-                            </TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                              <Chip
-                                label={user.role}
-                                size="small"
-                                color={
-                                  user.role === "Manager"
-                                    ? "primary"
-                                    : "default"
-                                }
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={user.status}
-                                size="small"
-                                color={
-                                  user.status === "Active"
-                                    ? "success"
-                                    : "default"
-                                }
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-
-          {/* Right Column */}
-          <Grid item xs={12} md={4}>
-            {/* Complaint Distribution */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <ModernDoughnutChart
-                title="Complaint Distribution"
-                data={complaintData}
-                labels={complaintLabels}
-              />
-            </motion.div>
-
-            {/* System Health */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Card sx={{ mt: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    System Health
-                  </Typography>
-                  {systemHealth.map((item, index) => (
-                    <Box key={index} sx={{ mb: 2 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mb: 0.5,
-                        }}
-                      >
-                        <Typography variant="body2" fontWeight={500}>
-                          {item.metric}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight={600}
-                          color="primary"
-                        >
-                          {item.value}%
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={item.value}
-                        color={getStatusColor(item.status)}
-                        sx={{
-                          height: 8,
-                          borderRadius: 4,
-                        }}
-                      />
-                    </Box>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Users */}
+        <div className="lg:col-span-2">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <div className="glass-card">
+              <div className="p-6 border-b border-secondary-100/50 dark:border-secondary-700/50">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold gradient-text">
+                    Recent Users
+                  </h2>
+                  <button className="text-sm text-primary-600 hover:text-primary-700 font-semibold transition-all duration-300 hover:scale-105">
+                    View All →
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {recentUsersData.map((userData, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-4 p-4 rounded-xl bg-white/60 dark:bg-secondary-700/60 backdrop-blur-lg border border-secondary-200/50 dark:border-secondary-600/50 hover:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+                        {userData.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-secondary-900 dark:text-white truncate">
+                          {userData.name}
+                        </p>
+                        <p className="text-xs text-secondary-500 truncate">
+                          {userData.email}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        userData.role === 'Manager' 
+                          ? 'bg-blue-50/80 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-500/30'
+                          : 'bg-secondary-100/80 dark:bg-secondary-700/80 text-secondary-600 dark:text-secondary-400 border border-secondary-200/50 dark:border-secondary-600/50'
+                      } backdrop-blur-lg shadow-sm`}>
+                        {userData.role}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        userData.status === 'Active'
+                          ? 'bg-success-50/80 dark:bg-success-500/20 text-success-600 dark:text-success-400 border border-success-200/50 dark:border-success-500/30'
+                          : 'bg-secondary-100/80 dark:bg-secondary-700/80 text-secondary-600 dark:text-secondary-400 border border-secondary-200/50 dark:border-secondary-600/50'
+                      } backdrop-blur-lg shadow-sm`}>
+                        {userData.status}
+                      </span>
+                    </div>
                   ))}
-                  <Button fullWidth variant="outlined" sx={{ mt: 2 }}>
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-        </Grid>
-      </Box>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* System Health */}
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <div className="glass-card p-6">
+              <h2 className="text-lg font-semibold gradient-text mb-6">
+                System Health
+              </h2>
+              <div className="space-y-4">
+                {systemHealth.map((item, index) => (
+                  <div key={index}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                        {item.metric}
+                      </p>
+                      <p className="text-sm font-bold text-primary-600">
+                        {item.value}%
+                      </p>
+                    </div>
+                    <div className="h-2 bg-secondary-200/50 dark:bg-secondary-700/50 rounded-full overflow-hidden backdrop-blur-lg">
+                      <div
+                        className={`h-full rounded-full transition-all duration-1000 ${
+                          item.status === 'excellent'
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-glow'
+                            : item.status === 'good'
+                            ? 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                            : 'bg-gradient-to-r from-amber-500 to-orange-600'
+                        }`}
+                        style={{ width: `${item.value}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button className="w-full mt-6 btn-secondary">
+                View Details
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </ModernLayout>
   );
 };

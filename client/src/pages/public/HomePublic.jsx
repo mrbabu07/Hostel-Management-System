@@ -22,7 +22,6 @@ import {
   TrendingUp,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import AppShell from "../../components/layout/AppShell";
 
 const HomePublic = () => {
   const { isAuthenticated } = useAuth();
@@ -85,7 +84,7 @@ const HomePublic = () => {
   ];
 
   return (
-    <AppShell>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f5f5f5" }}>
       <Box sx={{ minHeight: "calc(100vh - 64px)" }}>
         {/* Hero Section */}
         <Box
@@ -400,7 +399,7 @@ const HomePublic = () => {
           }
         `}
       </style>
-    </AppShell>
+    </Box>
   );
 };
 

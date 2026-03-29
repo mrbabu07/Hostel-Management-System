@@ -89,6 +89,40 @@ export default {
         'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
         'card': '0 1px 3px rgba(0, 0, 0, 0.05)',
         'card-hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
+        'premium': '0 10px 40px -10px rgba(139, 92, 246, 0.3), 0 0 20px -5px rgba(168, 85, 247, 0.2)',
+        'premium-lg': '0 20px 60px -15px rgba(139, 92, 246, 0.4), 0 0 30px -10px rgba(168, 85, 247, 0.3)',
+        'glow': '0 0 20px rgba(139, 92, 246, 0.5)',
+        'glow-lg': '0 0 40px rgba(139, 92, 246, 0.6)',
+        '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
+        '4xl': '0 45px 80px -20px rgba(0, 0, 0, 0.4)',
+      },
+      animation: {
+        'float': 'float 3s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+        'shimmer': 'shimmer 2s infinite',
+        'gradient': 'gradient-shift 3s ease infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(139, 92, 246, 0.6)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-1000px 0' },
+          '100%': { backgroundPosition: '1000px 0' },
+        },
+        'gradient-shift': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+      },
+      backdropBlur: {
+        'xs': '2px',
+        'premium': '20px',
       },
     },
   },

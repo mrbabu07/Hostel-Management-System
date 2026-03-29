@@ -29,7 +29,6 @@ import Profile from "../pages/student/Profile";
 
 // Manager Pages
 import ModernManagerDashboard from "../pages/manager/ModernManagerDashboard";
-import MenuManage from "../pages/manager/MenuManage";
 import EnhancedMenuManage from "../pages/manager/EnhancedMenuManage";
 import AttendanceMark from "../pages/manager/AttendanceMark";
 import AttendanceReport from "../pages/manager/AttendanceReport";
@@ -46,6 +45,7 @@ import ComplaintsManage from "../pages/admin/ComplaintsManage";
 import NoticesManage from "../pages/admin/NoticesManage";
 import BillingManage from "../pages/admin/BillingManage";
 import AnalyticsDashboard from "../pages/admin/AnalyticsDashboard";
+import AuditLogs from "../pages/admin/AuditLogs";
 import Settings from "../pages/admin/Settings";
 import AdminChat from "../pages/admin/Chat";
 
@@ -344,6 +344,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <RoleRoute allowedRoles={["admin"]}>
               <AnalyticsDashboard />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/audit-logs"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["admin"]}>
+              <AuditLogs />
             </RoleRoute>
           </ProtectedRoute>
         }

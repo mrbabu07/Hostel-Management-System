@@ -1,20 +1,20 @@
-# 🏢 Smart Hostel/Mess Management System
+# � Hostel Management System
 
-A complete, production-ready MERN stack application for managing hostel mess operations with role-based access control, analytics, and comprehensive features.
+A comprehensive full-stack web application for managing hostel operations including meal planning, attendance tracking, billing, inventory management, and real-time communication.
 
-![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
-![Coverage](https://img.shields.io/badge/Coverage-85%25-green)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Node.js](https://img.shields.io/badge/Node.js-18+-green)
+![React](https://img.shields.io/badge/React-18+-blue)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
 ## ✨ Features
 
-### 🔐 Authentication & Authorization
-
-- JWT-based authentication with refresh token support
-- Role-based access control (Student, Manager, Admin)
-- Secure password hashing with bcrypt
+### �‍🎓 Student Features
+- 📊 **Dashboard** - View stats, upcoming meals, pending bills
+- 🍽️ **Menu View** - Browse daily meals with images
+- ✅ **Meapassword hashing with bcrypt
 - Protected routes and middleware
 
 ### 🍽️ Menu Management

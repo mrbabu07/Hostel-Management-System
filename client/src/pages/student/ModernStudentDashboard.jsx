@@ -139,7 +139,7 @@ const ModernStudentDashboard = () => {
     <ModernLayout>
       {/* Welcome Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">
+        <h1 className="text-3xl font-bold gradient-text">
           Welcome back, {user?.name}! 👋
         </h1>
         <p className="text-secondary-600 dark:text-secondary-400 mt-1">
@@ -157,7 +157,7 @@ const ModernStudentDashboard = () => {
         {statsCards.map((stat) => (
           <div
             key={stat.name}
-            className="card p-6 hover:shadow-card-hover transition-shadow cursor-pointer"
+            className="glass-card p-6 hover-lift hover-glow cursor-pointer"
           >
             <div className="flex items-center justify-between mb-4">
               <div
@@ -169,20 +169,20 @@ const ModernStudentDashboard = () => {
                     : stat.color === 'danger'
                     ? 'from-danger-500 to-danger-600'
                     : 'from-primary-500 to-primary-600'
-                } flex items-center justify-center text-white shadow-lg`}
+                } flex items-center justify-center text-white shadow-premium animate-gradient`}
               >
                 <stat.icon className="w-6 h-6" />
               </div>
             </div>
             <div>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
+              <p className="text-2xl font-bold gradient-text">
                 {stat.value}
               </p>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1 font-medium">
                 {stat.name}
               </p>
               <p
-                className={`text-xs mt-2 ${
+                className={`text-xs mt-2 font-semibold ${
                   stat.changeType === 'positive'
                     ? 'text-success-600'
                     : stat.changeType === 'warning'
@@ -200,15 +200,15 @@ const ModernStudentDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Today's Menu */}
         <div className="lg:col-span-2">
-          <div className="card">
-            <div className="p-6 border-b border-secondary-100 dark:border-secondary-700">
+          <div className="glass-card">
+            <div className="p-6 border-b border-secondary-100/50 dark:border-secondary-700/50">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                <h2 className="text-lg font-semibold gradient-text">
                   Today's Menu
                 </h2>
                 <button
                   onClick={() => navigate('/student/menu')}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-semibold transition-all duration-300 hover:scale-105"
                 >
                   View All →
                 </button>
@@ -217,7 +217,7 @@ const ModernStudentDashboard = () => {
             <div className="p-6">
               {todayMenu.length === 0 ? (
                 <div className="text-center py-12">
-                  <CalendarIcon className="w-16 h-16 mx-auto text-secondary-300 dark:text-secondary-600 mb-4" />
+                  <CalendarIcon className="w-16 h-16 mx-auto text-secondary-300 dark:text-secondary-600 mb-4 animate-float" />
                   <p className="text-secondary-600 dark:text-secondary-400">
                     No menu available for today
                   </p>
@@ -227,7 +227,7 @@ const ModernStudentDashboard = () => {
                   {todayMenu.map((menu) => (
                     <div
                       key={menu._id}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-br p-6 text-white cursor-pointer hover:scale-105 transition-transform"
+                      className="relative overflow-hidden rounded-xl bg-gradient-to-br p-6 text-white cursor-pointer hover:-translate-y-2 transition-all duration-500 shadow-premium-lg hover:shadow-3xl animate-gradient"
                       style={{
                         backgroundImage: `linear-gradient(135deg, ${
                           menu.mealType === 'breakfast'
@@ -236,10 +236,11 @@ const ModernStudentDashboard = () => {
                             ? '#10B981, #059669'
                             : '#3B82F6, #2563EB'
                         })`,
+                        backgroundSize: '200% 200%',
                       }}
                     >
-                      <div className="text-4xl mb-3">{getMealIcon(menu.mealType)}</div>
-                      <h3 className="text-lg font-semibold capitalize mb-2">
+                      <div className="text-4xl mb-3 animate-float">{getMealIcon(menu.mealType)}</div>
+                      <h3 className="text-lg font-bold capitalize mb-2">
                         {menu.mealType}
                       </h3>
                       <p className="text-sm opacity-90">
@@ -258,20 +259,20 @@ const ModernStudentDashboard = () => {
         <div className="space-y-6">
           {/* Pending Payment */}
           {stats.pendingBills > 0 && (
-            <div className="card overflow-hidden">
-              <div className="bg-gradient-to-br from-warning-500 to-warning-600 p-6 text-white">
+            <div className="glass-card overflow-hidden hover-lift hover-glow">
+              <div className="bg-gradient-to-br from-warning-500 to-warning-600 p-6 text-white animate-gradient" style={{ backgroundSize: '200% 200%' }}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-lg flex items-center justify-center shadow-lg">
                     <CreditCardIcon className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm opacity-90">Pending Payment</p>
+                    <p className="text-sm opacity-90 font-medium">Pending Payment</p>
                     <p className="text-2xl font-bold">₹{stats.currentBill}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => navigate('/student/bill')}
-                  className="w-full bg-white text-warning-600 py-2.5 rounded-lg font-medium hover:bg-warning-50 transition-colors"
+                  className="w-full bg-white/90 backdrop-blur-lg text-warning-600 py-2.5 rounded-lg font-semibold hover:bg-white hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                 >
                   Pay Now
                 </button>
@@ -280,8 +281,8 @@ const ModernStudentDashboard = () => {
           )}
 
           {/* Quick Actions */}
-          <div className="card p-6">
-            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
+          <div className="glass-card p-6">
+            <h3 className="text-lg font-semibold gradient-text mb-4">
               Quick Actions
             </h3>
             <div className="space-y-2">
