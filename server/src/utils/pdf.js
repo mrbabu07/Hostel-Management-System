@@ -103,8 +103,8 @@ class PDFGenerator {
           doc
             .text(meal.type, col1, y)
             .text(meal.count.toString(), col2, y)
-            .text(`₹${meal.rate}`, col3, y)
-            .text(`₹${meal.amount}`, col4, y);
+            .text(`৳${meal.rate}`, col3, y)
+            .text(`৳${meal.amount}`, col4, y);
           y += 25;
         });
 
@@ -113,12 +113,12 @@ class PDFGenerator {
 
         // Subtotal and charges
         doc.text("Subtotal:", col3, y);
-        doc.text(`₹${bill.totalAmount || 0}`, col4, y);
+        doc.text(`৳${bill.totalAmount || 0}`, col4, y);
         y += 20;
 
         if (settings.extraCharges > 0) {
           doc.text("Extra Charges:", col3, y);
-          doc.text(`₹${settings.extraCharges}`, col4, y);
+          doc.text(`৳${settings.extraCharges}`, col4, y);
           y += 20;
         }
 
@@ -126,14 +126,14 @@ class PDFGenerator {
           const discount =
             (bill.totalAmount * settings.discountPercentage) / 100;
           doc.text(`Discount (${settings.discountPercentage}%):`, col3, y);
-          doc.text(`-₹${discount.toFixed(2)}`, col4, y);
+          doc.text(`-৳${discount.toFixed(2)}`, col4, y);
           y += 20;
         }
 
         if (settings.taxPercentage > 0) {
           const tax = (bill.totalAmount * settings.taxPercentage) / 100;
           doc.text(`Tax (${settings.taxPercentage}%):`, col3, y);
-          doc.text(`₹${tax.toFixed(2)}`, col4, y);
+          doc.text(`৳${tax.toFixed(2)}`, col4, y);
           y += 20;
         }
 
@@ -145,7 +145,7 @@ class PDFGenerator {
           .fontSize(14)
           .font("Helvetica-Bold")
           .text("Total Amount:", col3, y)
-          .text(`₹${bill.totalAmount}`, col4, y);
+          .text(`৳${bill.totalAmount}`, col4, y);
 
         // Status
         y += 30;

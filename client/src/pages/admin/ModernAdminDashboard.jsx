@@ -112,7 +112,7 @@ const ModernAdminDashboard = () => {
     },
     {
       title: "Monthly Revenue",
-      value: `₹${stats.monthlyRevenue.toLocaleString()}`,
+      value: `৳${stats.monthlyRevenue.toLocaleString()}`,
       icon: CreditCardIcon,
       color: "from-emerald-500 to-teal-600",
       trend: "+4.2%",

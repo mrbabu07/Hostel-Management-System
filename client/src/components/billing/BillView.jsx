@@ -105,7 +105,7 @@ const BillView = ({ bill }) => {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              ₹<CountUp end={totalAmount} duration={2} separator="," />
+              ৳<CountUp end={totalAmount} duration={2} separator="," />
             </Typography>
           </Box>
         </motion.div>
@@ -140,7 +140,7 @@ const BillView = ({ bill }) => {
                   <TableCell align="center">
                     {meal.dinner ? "✓" : "-"}
                   </TableCell>
-                  <TableCell align="right">₹{meal.total}</TableCell>
+                  <TableCell align="right">৳{meal.total}</TableCell>
                 </TableRow>
               ))}
               <TableRow sx={{ backgroundColor: "action.hover" }}>
@@ -148,7 +148,7 @@ const BillView = ({ bill }) => {
                   <Typography fontWeight={600}>Total</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography fontWeight={700}>₹{totalAmount}</Typography>
+                  <Typography fontWeight={700}>৳{totalAmount}</Typography>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -168,7 +168,7 @@ const BillView = ({ bill }) => {
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <Typography variant="body2">Cost per Meal:</Typography>
             <Typography variant="body2" fontWeight={600}>
-              ₹{costPerMeal}
+              ৳{costPerMeal}
             </Typography>
           </Box>
           <Divider sx={{ my: 1 }} />
@@ -177,7 +177,7 @@ const BillView = ({ bill }) => {
               Total Amount:
             </Typography>
             <Typography variant="body1" fontWeight={700} color="primary">
-              ₹{totalAmount}
+              ৳{totalAmount}
             </Typography>
           </Box>
         </Box>

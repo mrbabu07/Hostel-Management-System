@@ -89,7 +89,7 @@ const AnalyticsDashboard = () => {
                 value={48000}
                 icon={AttachMoney}
                 color="success"
-                prefix="₹"
+                prefix="৳"
                 trend="up"
                 trendValue="+4%"
               />
@@ -143,7 +143,7 @@ const AnalyticsDashboard = () => {
                 title="Monthly Revenue Trend"
                 data={revenueData}
                 labels={labels}
-                label="Revenue (₹)"
+                label="Revenue (৳)"
               />
             </motion.div>
           </Grid>

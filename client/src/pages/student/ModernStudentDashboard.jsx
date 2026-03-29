@@ -83,7 +83,7 @@ const ModernStudentDashboard = () => {
     },
     {
       name: 'Current Bill',
-      value: `₹${stats.currentBill}`,
+      value: `৳${stats.currentBill}`,
       change: stats.currentBill > 0 ? 'Pay now' : 'No pending bill',
       changeType: stats.currentBill > 0 ? 'warning' : 'neutral',
       icon: BanknotesIcon,
@@ -267,7 +267,7 @@ const ModernStudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm opacity-90 font-medium">Pending Payment</p>
-                    <p className="text-2xl font-bold">₹{stats.currentBill}</p>
+                    <p className="text-2xl font-bold">৳{stats.currentBill}</p>
                   </div>
                 </div>
                 <button

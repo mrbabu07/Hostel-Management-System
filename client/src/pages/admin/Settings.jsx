@@ -171,7 +171,7 @@ const Settings = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-                  Breakfast Price (₹)
+                  Breakfast Price (৳)
                 </label>
                 <input
                   type="number"
@@ -183,7 +183,7 @@ const Settings = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-                  Lunch Price (₹)
+                  Lunch Price (৳)
                 </label>
                 <input
                   type="number"
@@ -195,7 +195,7 @@ const Settings = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-                  Dinner Price (₹)
+                  Dinner Price (৳)
                 </label>
                 <input
                   type="number"
@@ -274,7 +274,7 @@ const Settings = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-                  Extra Charges (₹)
+                  Extra Charges (৳)
                 </label>
                 <input
                   type="number"

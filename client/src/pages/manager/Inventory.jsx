@@ -333,7 +333,7 @@ const Inventory = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-medium text-secondary-900 dark:text-white">₹{item.price}</p>
+                        <p className="font-medium text-secondary-900 dark:text-white">৳{item.price}</p>
                         <p className="text-xs text-secondary-500">per {item.unit}</p>
                       </td>
                       <td className="px-6 py-4">

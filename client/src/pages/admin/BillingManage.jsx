@@ -55,7 +55,7 @@ const BillingManage = () => {
   };
 
   const handleGenerateBills = async () => {
-    if (!window.confirm(`Generate bills of ₹6,000 for each student for ${getMonthName(month)} ${year}?`)) return;
+    if (!window.confirm(`Generate bills of ৳6,000 for each student for ${getMonthName(month)} ${year}?`)) return;
     try {
       setGenerating(true);
       const response = await billingService.generateBills(month, year);
@@ -101,7 +101,7 @@ const BillingManage = () => {
       width: 150,
       renderCell: (params) => (
         <Typography variant="body2" fontWeight={600} color="primary">
-          ₹{params.value}
+          ৳{params.value}
         </Typography>
       ),
     },
@@ -188,7 +188,7 @@ const BillingManage = () => {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Alert severity="info" sx={{ mb: 2 }}>
-                Each student will be charged ₹6,000 per month (₹2,000 for each meal type)
+                Each student will be charged ৳6,000 per month (৳2,000 for each meal type)
               </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>

@@ -189,11 +189,11 @@ const ModernMyBill = () => {
                                   variant="caption"
                                   color="text.secondary"
                                 >
-                                  {data.count} meals × ₹{data.rate}
+                                  {data.count} meals × ৳{data.rate}
                                 </Typography>
                               </Box>
                               <Typography variant="body2" fontWeight={600}>
-                                ₹{data.total}
+                                ৳{data.total}
                               </Typography>
                             </Box>
                           ),
@@ -219,7 +219,7 @@ const ModernMyBill = () => {
                           fontWeight={700}
                           color="primary"
                         >
-                          ₹{bill.totalAmount}
+                          ৳{bill.totalAmount}
                         </Typography>
                       </Box>
 
@@ -272,7 +272,7 @@ const ModernMyBill = () => {
             {selectedBill && (
               <Box>
                 <Alert severity="info" sx={{ mb: 3 }}>
-                  You are about to pay ₹{selectedBill.totalAmount} for{" "}
+                  You are about to pay ৳{selectedBill.totalAmount} for{" "}
                   {new Date(2024, selectedBill.month - 1).toLocaleString(
                     "default",
                     { month: "long" },

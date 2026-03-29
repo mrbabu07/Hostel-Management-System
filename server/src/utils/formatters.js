@@ -30,7 +30,7 @@ const formatDateTime = (date) => {
  * Format currency
  */
 const formatCurrency = (amount) => {
-  return `₹${amount.toLocaleString("en-IN")}`;
+  return `৳${amount.toLocaleString("en-IN")}`;
 };
 
 module.exports = {

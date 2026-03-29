@@ -148,7 +148,7 @@ const StripePaymentForm = ({ bill, onSuccess, onCancel }) => {
             processing ? <CircularProgress size={20} /> : <Payment />
           }
         >
-          {processing ? "Processing..." : `Pay ₹${bill.totalAmount}`}
+          {processing ? "Processing..." : `Pay ৳${bill.totalAmount}`}
         </Button>
       </Box>
     </form>

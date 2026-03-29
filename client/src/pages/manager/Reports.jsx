@@ -93,7 +93,7 @@ const Reports = () => {
                 value={51000}
                 icon={AttachMoney}
                 color="success"
-                prefix="₹"
+                prefix="৳"
                 trend="up"
                 trendValue="+2%"
               />
@@ -243,7 +243,7 @@ const Reports = () => {
                 title="Weekly Revenue"
                 data={revenueData}
                 labels={labels}
-                label="Revenue (₹)"
+                label="Revenue (৳)"
               />
             </motion.div>
           </Grid>
