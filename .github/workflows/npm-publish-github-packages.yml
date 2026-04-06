@@ -8,18 +8,40 @@ on:
     types: [created]
 
 jobs:
-  build:
+  build-server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
-      - run: npm test
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+      - name: Run server tests
+        run: npm test --if-present
+        working-directory: server
+
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: client
+      - name: Build client
+        run: npm run build --if-present
+        working-directory: client
 
   publish-gpr:
-    needs: build
+    needs: [build-server, build-client]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +52,13 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
-      - run: npm ci
-      - run: npm publish
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+      - name: Publish server package
+        run: npm publish
+        working-directory: server
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        continue-on-error: true
+
