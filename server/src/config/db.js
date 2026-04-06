@@ -10,23 +10,24 @@ const connectDB = async () => {
         strict: true,
         deprecationErrors: true,
       },
-      serverSelectionTimeoutMS: 10000, // Timeout after 10s instead of 30s
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     });
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
 
     // Test connection
     await mongoose.connection.db.admin().command({ ping: 1 });
-    console.log("Pinged your deployment. Successfully connected to MongoDB!");
+    console.log("✅ Successfully connected to MongoDB!");
   } catch (error) {
-    console.error(`MongoDB Connection Error: ${error.message}`);
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
     console.error("\n⚠️  Possible issues:");
-    console.error("   1. MongoDB Atlas cluster might be paused (check your Atlas dashboard)");
+    console.error("   1. MongoDB Atlas cluster might be paused");
     console.error("   2. Network connectivity issue");
-    console.error("   3. Incorrect connection string");
-    console.error("   4. IP address not whitelisted in MongoDB Atlas\n");
-    process.exit(1);
+    console.error("   3. Incorrect connection string in .env");
+    console.error("   4. IP address not whitelisted in MongoDB Atlas");
+    console.error("   5. Database credentials are incorrect\n");
+    console.warn("⚠️  Server will continue running without database connection\n");
   }
 };
 
