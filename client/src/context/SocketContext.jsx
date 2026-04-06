@@ -21,51 +21,48 @@ export const SocketProvider = ({ children }) => {
   const token = auth?.token;
 
   useEffect(() => {
-    if (token && user) {
-      try {
-        const newSocket = io("http://localhost:5000", {
-          auth: { token },
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 5,
-        });
-
-        newSocket.on("connect", () => {
-          console.log("✅ Socket connected");
-          setOnline(true);
-        });
-
-        newSocket.on("disconnect", () => {
-          console.log("❌ Socket disconnected");
-          setOnline(false);
-        });
-
-        newSocket.on("connect_error", (error) => {
-          console.error("❌ Socket connection error:", error);
-          setOnline(false);
-        });
-
-        newSocket.on("user-connected", (data) => {
-          console.log("👤 User connected:", data);
-        });
-
-        setSocket(newSocket);
-
-        return () => {
-          newSocket.close();
-        };
-      } catch (error) {
-        console.error("Error initializing socket:", error);
-      }
-    } else {
-      if (socket) {
-        socket.close();
-        setSocket(null);
-        setOnline(false);
-      }
+    if (!token || !user) {
+      // No token, don't connect
+      return;
     }
-  }, [token, user, socket]);
+
+    try {
+      const newSocket = io("http://localhost:5000", {
+        auth: { token },
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+      });
+
+      newSocket.on("connect", () => {
+        console.log("✅ Socket connected");
+        setOnline(true);
+      });
+
+      newSocket.on("disconnect", () => {
+        console.log("❌ Socket disconnected");
+        setOnline(false);
+      });
+
+      newSocket.on("connect_error", (error) => {
+        console.error("❌ Socket connection error:", error);
+        setOnline(false);
+      });
+
+      newSocket.on("user-connected", (data) => {
+        console.log("👤 User connected:", data);
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        newSocket.close();
+      };
+    } catch (error) {
+      console.error("Error initializing socket:", error);
+    }
+  }, [token, user]);
 
   return (
     <SocketContext.Provider value={{ socket, online }}>

@@ -1,7 +1,7 @@
 const User = require("../models/User.model");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
-const { auditLog } = require("../services/audit.service");
+const AuditService = require("../services/audit.service");
 
 // Get all users (Admin only)
 exports.getAllUsers = async (req, res, next) => {
@@ -27,8 +27,12 @@ exports.getAllUsers = async (req, res, next) => {
 
     const total = await User.countDocuments(query);
 
-    await auditLog(req.user._id, "users.list", "User", null, {
-      filters: { role, search },
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.list",
+      entityType: "User",
+      metadata: { filters: { role, search } },
     });
 
     res.json(
@@ -57,7 +61,13 @@ exports.getUserById = async (req, res, next) => {
       throw new ApiError(404, "User not found");
     }
 
-    await auditLog(req.user._id, "users.view", "User", user._id);
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.view",
+      entityType: "User",
+      entityId: user._id,
+    });
 
     res.json(new ApiResponse(200, { user }));
   } catch (error) {
@@ -84,10 +94,17 @@ exports.createUser = async (req, res, next) => {
     delete userResponse.password;
     delete userResponse.refreshToken;
 
-    await auditLog(req.user._id, "users.create", "User", user._id, {
-      name: user.name,
-      email: user.email,
-      role: user.role,
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.create",
+      entityType: "User",
+      entityId: user._id,
+      metadata: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
 
     res.status(201).json(
@@ -130,8 +147,13 @@ exports.updateUser = async (req, res, next) => {
     delete userResponse.password;
     delete userResponse.refreshToken;
 
-    await auditLog(req.user._id, "users.update", "User", user._id, {
-      changes: updateData,
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.update",
+      entityType: "User",
+      entityId: user._id,
+      metadata: { changes: updateData },
     });
 
     res.json(
@@ -157,9 +179,16 @@ exports.deleteUser = async (req, res, next) => {
 
     await user.deleteOne();
 
-    await auditLog(req.user._id, "users.delete", "User", user._id, {
-      name: user.name,
-      email: user.email,
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.delete",
+      entityType: "User",
+      entityId: user._id,
+      metadata: {
+        name: user.name,
+        email: user.email,
+      },
     });
 
     res.json(new ApiResponse(200, null, "User deleted successfully"));
@@ -179,8 +208,13 @@ exports.toggleUserStatus = async (req, res, next) => {
     user.isActive = !user.isActive;
     await user.save();
 
-    await auditLog(req.user._id, "users.toggleStatus", "User", user._id, {
-      isActive: user.isActive,
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.toggleStatus",
+      entityType: "User",
+      entityId: user._id,
+      metadata: { isActive: user.isActive },
     });
 
     res.json(
