@@ -17,40 +17,47 @@ export const SocketProvider = ({ children }) => {
   const [online, setOnline] = useState(false);
   const auth = useAuth();
 
-  // Safely destructure after checking auth exists
   const user = auth?.user;
   const token = auth?.token;
 
   useEffect(() => {
     if (token && user) {
-      const newSocket = io("http://localhost:5000", {
-        auth: { token },
-      });
+      try {
+        const newSocket = io("http://localhost:5000", {
+          auth: { token },
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: 5,
+        });
 
-      newSocket.on("connect", () => {
-        console.log("Socket connected");
-        setOnline(true);
-      });
+        newSocket.on("connect", () => {
+          console.log("✅ Socket connected");
+          setOnline(true);
+        });
 
-      newSocket.on("disconnect", () => {
-        console.log("Socket disconnected");
-        setOnline(false);
-      });
+        newSocket.on("disconnect", () => {
+          console.log("❌ Socket disconnected");
+          setOnline(false);
+        });
 
-      newSocket.on("connect_error", (error) => {
-        console.error("Socket connection error:", error);
-        setOnline(false);
-      });
+        newSocket.on("connect_error", (error) => {
+          console.error("❌ Socket connection error:", error);
+          setOnline(false);
+        });
 
-      newSocket.on("user-connected", (data) => {
-        console.log("User connected:", data);
-      });
+        newSocket.on("user-connected", (data) => {
+          console.log("👤 User connected:", data);
+        });
 
-      setSocket(newSocket);
+        setSocket(newSocket);
 
-      return () => {
-        newSocket.close();
-      };
+        return () => {
+          newSocket.close();
+        };
+      } catch (error) {
+        console.error("Error initializing socket:", error);
+      }
     } else {
       if (socket) {
         socket.close();
@@ -58,7 +65,7 @@ export const SocketProvider = ({ children }) => {
         setOnline(false);
       }
     }
-  }, [token, user]);
+  }, [token, user, socket]);
 
   return (
     <SocketContext.Provider value={{ socket, online }}>
