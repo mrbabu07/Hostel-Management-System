@@ -54,6 +54,13 @@ router.get(
 );
 
 router.get(
+  "/export/csv",
+  protect,
+  authorize("admin"),
+  usersController.exportUsers
+);
+
+router.get(
   "/stats",
   protect,
   authorize("admin"),

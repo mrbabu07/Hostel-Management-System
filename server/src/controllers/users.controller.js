@@ -2,6 +2,7 @@ const User = require("../models/User.model");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 const AuditService = require("../services/audit.service");
+const CSVExport = require("../utils/csvExport");
 
 // Get all users (Admin only)
 exports.getAllUsers = async (req, res, next) => {
@@ -45,6 +46,36 @@ exports.getAllUsers = async (req, res, next) => {
         },
       })
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Export users to CSV
+exports.exportUsers = async (req, res, next) => {
+  try {
+    const { role } = req.query;
+    
+    const query = {};
+    if (role) query.role = role;
+
+    const users = await User.find(query)
+      .select("-password -refreshToken")
+      .sort({ createdAt: -1 });
+
+    const csv = CSVExport.exportUsers(users);
+
+    await AuditService.log({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      action: "users.export",
+      entityType: "User",
+      metadata: { count: users.length, role },
+    });
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="users-${Date.now()}.csv"`);
+    res.send(csv);
   } catch (error) {
     next(error);
   }

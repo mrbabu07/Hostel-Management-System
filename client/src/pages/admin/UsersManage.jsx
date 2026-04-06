@@ -20,11 +20,12 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import { PersonAdd, Edit, ToggleOn, ToggleOff, Delete } from "@mui/icons-material";
+import { PersonAdd, Edit, ToggleOn, ToggleOff, Delete, Download } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
 import ModernTable from "../../components/common/ModernTable";
 import { usersService } from "../../services/users.service";
+import { exportToCSV, exportFromAPI } from "../../utils/exportUtils";
 
 const UsersManage = () => {
   const [users, setUsers] = useState([]);
@@ -133,6 +134,18 @@ const UsersManage = () => {
     setIsModalOpen(true);
   };
 
+  const handleExportCSV = async () => {
+    try {
+      await exportFromAPI(
+        "http://localhost:5000/api/v1/users/export/csv",
+        `users-${new Date().toISOString().split("T")[0]}.csv`
+      );
+    } catch (error) {
+      console.error("Export error:", error);
+      setError("Failed to export users");
+    }
+  };
+
   const columns = [
     {
       field: "name",
@@ -237,18 +250,32 @@ const UsersManage = () => {
                   Manage all users, roles, and permissions ({users.length} users)
                 </p>
               </div>
-              <Button
-                variant="contained"
-                startIcon={<PersonAdd />}
-                onClick={openCreateModal}
-                sx={{
-                  bgcolor: "white",
-                  color: "primary.main",
-                  "&:hover": { bgcolor: "grey.100" },
-                }}
-              >
-                Add User
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="contained"
+                  startIcon={<Download />}
+                  onClick={handleExportCSV}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    color: "white",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.3)" },
+                  }}
+                >
+                  Export CSV
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<PersonAdd />}
+                  onClick={openCreateModal}
+                  sx={{
+                    bgcolor: "white",
+                    color: "primary.main",
+                    "&:hover": { bgcolor: "grey.100" },
+                  }}
+                >
+                  Add User
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>
