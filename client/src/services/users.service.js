@@ -6,4 +6,5 @@ export const usersService = {
   updateUser: (id, userData) => api.put(`/users/${id}`, userData),
   deleteUser: (id) => api.delete(`/users/${id}`),
   createUser: (userData) => api.post("/users", userData),
+  toggleUserStatus: (id) => api.patch(`/users/${id}/toggle-status`),
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -17,38 +17,19 @@ import {
   Chip,
   Avatar,
   IconButton,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-import { PersonAdd, Edit, ToggleOn, ToggleOff } from "@mui/icons-material";
+import { PersonAdd, Edit, ToggleOn, ToggleOff, Delete } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
 import ModernTable from "../../components/common/ModernTable";
+import { usersService } from "../../services/users.service";
 
 const UsersManage = () => {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "student",
-      rollNumber: "2024001",
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "manager",
-      isActive: true,
-    },
-    {
-      id: 3,
-      name: "Bob Wilson",
-      email: "bob@example.com",
-      role: "student",
-      rollNumber: "2024002",
-      isActive: false,
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -60,37 +41,83 @@ const UsersManage = () => {
     phone: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editingUser) {
-      setUsers(
-        users.map((u) => (u.id === editingUser.id ? { ...u, ...formData } : u)),
-      );
-    } else {
-      setUsers([...users, { id: Date.now(), ...formData, isActive: true }]);
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await usersService.getAllUsers();
+      setUsers(response.data.users || []);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError(err.response?.data?.message || "Failed to fetch users");
+    } finally {
+      setLoading(false);
     }
-    setIsModalOpen(false);
-    setEditingUser(null);
-    setFormData({
-      name: "",
-      email: "",
-      role: "student",
-      rollNumber: "",
-      roomNumber: "",
-      phone: "",
-    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingUser) {
+        await usersService.updateUser(editingUser._id, formData);
+      } else {
+        await usersService.createUser(formData);
+      }
+      await fetchUsers();
+      setIsModalOpen(false);
+      setEditingUser(null);
+      setFormData({
+        name: "",
+        email: "",
+        role: "student",
+        rollNumber: "",
+        roomNumber: "",
+        phone: "",
+      });
+    } catch (err) {
+      console.error("Error saving user:", err);
+      setError(err.response?.data?.message || "Failed to save user");
+    }
   };
 
   const handleEdit = (user) => {
     setEditingUser(user);
-    setFormData(user);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      rollNumber: user.rollNumber || "",
+      roomNumber: user.roomNumber || "",
+      phone: user.phone || "",
+    });
     setIsModalOpen(true);
   };
 
-  const toggleStatus = (id) => {
-    setUsers(
-      users.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u)),
-    );
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await usersService.deleteUser(id);
+        await fetchUsers();
+      } catch (err) {
+        console.error("Error deleting user:", err);
+        setError(err.response?.data?.message || "Failed to delete user");
+      }
+    }
+  };
+
+  const toggleStatus = async (id) => {
+    try {
+      await usersService.toggleUserStatus(id);
+      await fetchUsers();
+    } catch (err) {
+      console.error("Error toggling status:", err);
+      setError(err.response?.data?.message || "Failed to toggle status");
+    }
   };
 
   const openCreateModal = () => {
@@ -114,7 +141,7 @@ const UsersManage = () => {
       renderCell: (params) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Avatar sx={{ width: 32, height: 32 }}>
-            {params.row.name.charAt(0)}
+            {params.row.name?.charAt(0) || "U"}
           </Avatar>
           <Typography variant="body2" fontWeight={500}>
             {params.row.name}
@@ -143,6 +170,18 @@ const UsersManage = () => {
       renderCell: (params) => params.value || "N/A",
     },
     {
+      field: "phone",
+      headerName: "Phone",
+      width: 130,
+      renderCell: (params) => params.value || "N/A",
+    },
+    {
+      field: "roomNumber",
+      headerName: "Room",
+      width: 100,
+      renderCell: (params) => params.value || "N/A",
+    },
+    {
       field: "isActive",
       headerName: "Status",
       width: 120,
@@ -151,7 +190,7 @@ const UsersManage = () => {
           label={params.value ? "Active" : "Inactive"}
           size="small"
           color={params.value ? "success" : "default"}
-          onClick={() => toggleStatus(params.row.id)}
+          onClick={() => toggleStatus(params.row._id)}
           icon={params.value ? <ToggleOn /> : <ToggleOff />}
           sx={{ cursor: "pointer" }}
         />
@@ -160,15 +199,24 @@ const UsersManage = () => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 100,
+      width: 120,
       renderCell: (params) => (
-        <IconButton
-          size="small"
-          color="primary"
-          onClick={() => handleEdit(params.row)}
-        >
-          <Edit fontSize="small" />
-        </IconButton>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={() => handleEdit(params.row)}
+          >
+            <Edit fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => handleDelete(params.row._id)}
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </Box>
       ),
     },
   ];
@@ -186,7 +234,7 @@ const UsersManage = () => {
               <div>
                 <h1 className="text-4xl font-bold mb-2">User Management 👥</h1>
                 <p className="text-purple-100">
-                  Manage all users, roles, and permissions
+                  Manage all users, roles, and permissions ({users.length} users)
                 </p>
               </div>
               <Button
@@ -205,14 +253,30 @@ const UsersManage = () => {
           </div>
         </motion.div>
 
-        {/* Users Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <ModernTable columns={columns} rows={users} />
-        </motion.div>
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            {/* Users Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <ModernTable columns={columns} rows={users} getRowId={(row) => row._id} />
+            </motion.div>
+          </>
+        )}
 
         {/* Modal */}
         <Dialog
