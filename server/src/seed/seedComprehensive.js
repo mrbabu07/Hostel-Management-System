@@ -143,20 +143,30 @@ const seedComprehensive = async () => {
     console.log("📍 Creating attendance records...");
     const attendanceRecords = [];
     const students = createdUsers.filter((u) => u.role === "student");
+    const attendanceSet = new Set();
 
-    for (let i = 0; i < 500; i++) {
-      const randomStudent = students[Math.floor(Math.random() * students.length)];
-      const randomMealType = mealTypes[Math.floor(Math.random() * mealTypes.length)];
-      const randomDate = new Date();
-      randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 30));
+    // Create attendance for each student for each day and meal type
+    for (let day = 0; day < 30; day++) {
+      const date = new Date();
+      date.setDate(date.getDate() - day);
+      date.setHours(0, 0, 0, 0);
 
-      attendanceRecords.push({
-        student: randomStudent._id,
-        mealType: randomMealType,
-        date: randomDate,
-        status: Math.random() > 0.2 ? "Present" : "Absent",
-        markedBy: createdUsers.find((u) => u.role === "manager")?._id,
-      });
+      for (const student of students) {
+        for (const mealType of mealTypes) {
+          const key = `${student._id}-${date.toISOString()}-${mealType}`;
+          if (!attendanceSet.has(key)) {
+            attendanceSet.add(key);
+            attendanceRecords.push({
+              student: student._id,
+              mealType: mealType,
+              date: date,
+              present: Math.random() > 0.2,
+              approved: Math.random() > 0.3,
+              markedBy: createdUsers.find((u) => u.role === "manager")?._id,
+            });
+          }
+        }
+      }
     }
 
     const createdAttendance = await Attendance.insertMany(attendanceRecords);
@@ -165,27 +175,54 @@ const seedComprehensive = async () => {
     // 4. Create Bills (100 bills)
     console.log("💰 Creating bills...");
     const bills = [];
-    const months = ["January", "February", "March", "April", "May", "June"];
+    const billSet = new Set();
 
     for (let i = 0; i < 100; i++) {
       const randomStudent = students[Math.floor(Math.random() * students.length)];
-      const randomMonth = months[Math.floor(Math.random() * months.length)];
-      const mealCount = Math.floor(Math.random() * 60) + 20;
+      const randomMonth = Math.floor(Math.random() * 12) + 1; // 1-12
+      const year = 2024;
+      
+      const key = `${randomStudent._id}-${randomMonth}-${year}`;
+      if (!billSet.has(key)) {
+        billSet.add(key);
+        
+        const breakfastCount = Math.floor(Math.random() * 20) + 5;
+        const lunchCount = Math.floor(Math.random() * 20) + 5;
+        const dinnerCount = Math.floor(Math.random() * 20) + 5;
 
-      bills.push({
-        student: randomStudent._id,
-        month: randomMonth,
-        year: 2024,
-        totalMeals: mealCount,
-        mealCost: 100,
-        totalAmount: mealCount * 100,
-        charges: Math.floor(Math.random() * 500),
-        discount: Math.floor(Math.random() * 200),
-        tax: Math.floor((mealCount * 100 * 15) / 100),
-        status: Math.random() > 0.3 ? "PAID" : "DUE",
-        paidDate: Math.random() > 0.3 ? new Date() : null,
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      });
+        const breakfastTotal = breakfastCount * 30;
+        const lunchTotal = lunchCount * 50;
+        const dinnerTotal = dinnerCount * 50;
+        const totalAmount = breakfastTotal + lunchTotal + dinnerTotal;
+
+        bills.push({
+          student: randomStudent._id,
+          month: randomMonth,
+          year: year,
+          breakdown: {
+            breakfast: {
+              count: breakfastCount,
+              rate: 30,
+              total: breakfastTotal,
+            },
+            lunch: {
+              count: lunchCount,
+              rate: 50,
+              total: lunchTotal,
+            },
+            dinner: {
+              count: dinnerCount,
+              rate: 50,
+              total: dinnerTotal,
+            },
+          },
+          totalAmount: totalAmount,
+          status: Math.random() > 0.3 ? "paid" : "pending",
+          paidAt: Math.random() > 0.3 ? new Date() : null,
+          paymentMethod: ["stripe", "cash", "other"][Math.floor(Math.random() * 3)],
+          generatedBy: createdUsers.find((u) => u.role === "admin")?._id,
+        });
+      }
     }
 
     const createdBills = await Bill.insertMany(bills);
@@ -194,21 +231,24 @@ const seedComprehensive = async () => {
     // 5. Create Complaints (80 complaints)
     console.log("📝 Creating complaints...");
     const complaints = [];
-    const categories = ["Food", "Room", "Maintenance", "Other"];
-    const statuses = ["Pending", "In Progress", "Resolved", "Rejected"];
-    const priorities = ["Low", "Medium", "High"];
+    const complaintCategories = ["food", "room", "maintenance", "other"];
+    const complaintStatuses = ["pending", "in-progress", "resolved"];
+    const complaintPriorities = ["low", "medium", "high"];
 
     for (let i = 0; i < 80; i++) {
       const randomStudent = students[Math.floor(Math.random() * students.length)];
+      const isResolved = Math.random() > 0.6;
+      
       complaints.push({
         student: randomStudent._id,
-        category: categories[Math.floor(Math.random() * categories.length)],
+        category: complaintCategories[Math.floor(Math.random() * complaintCategories.length)],
         title: `Complaint ${i + 1}`,
         description: `This is a detailed complaint description for complaint ${i + 1}`,
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        priority: priorities[Math.floor(Math.random() * priorities.length)],
-        adminNote: `Admin response for complaint ${i + 1}`,
-        resolvedDate: Math.random() > 0.5 ? new Date() : null,
+        status: complaintStatuses[Math.floor(Math.random() * complaintStatuses.length)],
+        priority: complaintPriorities[Math.floor(Math.random() * complaintPriorities.length)],
+        resolvedBy: isResolved ? createdUsers.find((u) => u.role === "admin")?._id : null,
+        resolvedAt: isResolved ? new Date() : null,
+        adminNotes: `Admin response for complaint ${i + 1}`,
       });
     }
 
@@ -218,14 +258,17 @@ const seedComprehensive = async () => {
     // 6. Create Notices (40 notices)
     console.log("📢 Creating notices...");
     const notices = [];
-    const audiences = ["All", "Student", "Manager"];
+    const audiences = ["all", "students", "managers"];
+    const noticeCategories = ["general", "urgent", "event", "maintenance"];
 
     for (let i = 0; i < 40; i++) {
+      const isUrgent = i < 5; // First 5 notices are urgent and pinned
       notices.push({
-        title: `Notice ${i + 1}`,
+        title: `${isUrgent ? "🚨 URGENT: " : ""}Notice ${i + 1}`,
         content: `This is the content of notice ${i + 1}. Important information for all users.`,
+        category: isUrgent ? "urgent" : noticeCategories[Math.floor(Math.random() * noticeCategories.length)],
         targetAudience: audiences[Math.floor(Math.random() * audiences.length)],
-        isPinned: Math.random() > 0.7,
+        isPinned: isUrgent || Math.random() > 0.7,
         createdBy: createdUsers.find((u) => u.role === "admin")?._id,
       });
     }
@@ -254,33 +297,40 @@ const seedComprehensive = async () => {
     // 8. Create Inventory (50 items)
     console.log("📦 Creating inventory...");
     const inventoryItems = [];
-    const items = [
+    const inventoryItemNames = [
       "Rice",
       "Wheat Flour",
       "Lentils",
       "Chicken",
       "Fish",
       "Beef",
-      "Vegetables",
+      "Tomatoes",
+      "Onions",
       "Oil",
       "Salt",
-      "Spices",
+      "Turmeric",
       "Milk",
       "Eggs",
       "Butter",
-      "Cheese",
       "Bread",
     ];
+    const inventoryCategories = ["vegetables", "grains", "dairy", "spices", "beverages", "other"];
+    const inventoryUnits = ["kg", "g", "l", "ml", "pieces", "packets", "bags"];
 
     for (let i = 0; i < 50; i++) {
+      const quantity = Math.floor(Math.random() * 1000) + 100;
+      const minThreshold = Math.floor(Math.random() * 50) + 10;
+      
       inventoryItems.push({
-        itemName: items[Math.floor(Math.random() * items.length)] + ` ${i}`,
-        quantity: Math.floor(Math.random() * 1000) + 100,
-        unit: ["kg", "liter", "piece", "box"][Math.floor(Math.random() * 4)],
-        category: ["Grains", "Vegetables", "Meat", "Dairy", "Spices"][
-          Math.floor(Math.random() * 5)
-        ],
-        lastUpdated: new Date(),
+        itemName: inventoryItemNames[Math.floor(Math.random() * inventoryItemNames.length)] + ` ${i}`,
+        quantity: quantity,
+        unit: inventoryUnits[Math.floor(Math.random() * inventoryUnits.length)],
+        category: inventoryCategories[Math.floor(Math.random() * inventoryCategories.length)],
+        minThreshold: minThreshold,
+        price: Math.floor(Math.random() * 500) + 50,
+        supplier: `Supplier ${Math.floor(Math.random() * 10) + 1}`,
+        lastRestocked: new Date(),
+        expiryDate: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000),
       });
     }
 
@@ -290,18 +340,28 @@ const seedComprehensive = async () => {
     // 9. Create Meal Plans (200 meal confirmations)
     console.log("🍴 Creating meal plans...");
     const mealPlans = [];
+    const mealPlanSet = new Set();
 
     for (let i = 0; i < 200; i++) {
       const randomStudent = students[Math.floor(Math.random() * students.length)];
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 30));
+      futureDate.setHours(0, 0, 0, 0);
 
-      mealPlans.push({
-        student: randomStudent._id,
-        date: futureDate,
-        mealType: mealTypes[Math.floor(Math.random() * mealTypes.length)],
-        confirmed: Math.random() > 0.3,
-      });
+      const key = `${randomStudent._id}-${futureDate.toISOString()}`;
+      if (!mealPlanSet.has(key)) {
+        mealPlanSet.add(key);
+        
+        mealPlans.push({
+          student: randomStudent._id,
+          date: futureDate,
+          meals: {
+            breakfast: Math.random() > 0.3,
+            lunch: Math.random() > 0.3,
+            dinner: Math.random() > 0.3,
+          },
+        });
+      }
     }
 
     const createdMealPlans = await MealPlan.insertMany(mealPlans);
@@ -330,7 +390,7 @@ const seedComprehensive = async () => {
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error("❌ Seeding error:", error);
+    console.error("❌ Seeding error:", error.message);
     process.exit(1);
   }
 };

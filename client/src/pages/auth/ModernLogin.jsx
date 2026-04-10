@@ -323,13 +323,13 @@ const ModernLogin = () => {
               Demo Credentials:
             </Typography>
             <Typography variant="caption" display="block">
-              <strong>Admin:</strong> admin@hostel.com / Admin@123
+              <strong>Admin:</strong> admin@hostel.com / Password@123
             </Typography>
             <Typography variant="caption" display="block">
-              <strong>Manager:</strong> manager@hostel.com / Manager@123
+              <strong>Manager:</strong> manager1@hostel.com / Password@123
             </Typography>
             <Typography variant="caption" display="block">
-              <strong>Student:</strong> student@hostel.com / Student@123
+              <strong>Student:</strong> student1@hostel.com / Password@123
             </Typography>
           </Box>
         </Card>

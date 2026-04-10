@@ -51,7 +51,13 @@ const Home = () => {
       const mealsData = menus.map((menu) => ({
         type: menu.mealType.charAt(0).toUpperCase() + menu.mealType.slice(1),
         time: getMealTime(menu.mealType),
-        menu: menu.items.map(item => item.name || item),
+        menu: menu.items.map(item => {
+          // Handle both string and object formats
+          if (typeof item === 'string') {
+            return item;
+          }
+          return item.name || item.description || 'Menu Item';
+        }),
         icon: getMealIcon(menu.mealType),
         status: getMealStatus(menu.mealType),
         color: getMealColor(menu.mealType),
