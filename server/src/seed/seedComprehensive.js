@@ -91,45 +91,47 @@ const seedComprehensive = async () => {
     // 2. Create Menus (30 days of menus)
     console.log("🍽️  Creating menus...");
     const menus = [];
-    const mealTypes = ["Breakfast", "Lunch", "Dinner"];
+    const mealTypes = ["breakfast", "lunch", "dinner"];
     const breakfastItems = [
-      "Paratha with Egg",
-      "Puri with Potato Curry",
-      "Bread with Jam",
-      "Rice Porridge",
-      "Omelette with Toast",
+      { name: "Paratha with Egg", description: "Crispy paratha with fried egg" },
+      { name: "Puri with Potato Curry", description: "Fried puri with spiced potato" },
+      { name: "Bread with Jam", description: "Toast with jam and butter" },
+      { name: "Rice Porridge", description: "Soft rice porridge with vegetables" },
+      { name: "Omelette with Toast", description: "Fluffy omelette with toasted bread" },
     ];
     const lunchItems = [
-      "Rice with Chicken Curry",
-      "Rice with Fish Curry",
-      "Rice with Beef Curry",
-      "Rice with Lentil Curry",
-      "Biryani",
+      { name: "Rice with Chicken Curry", description: "Basmati rice with tender chicken" },
+      { name: "Rice with Fish Curry", description: "Rice with spiced fish curry" },
+      { name: "Rice with Beef Curry", description: "Rice with rich beef curry" },
+      { name: "Rice with Lentil Curry", description: "Rice with dal curry" },
+      { name: "Biryani", description: "Fragrant biryani with meat" },
     ];
     const dinnerItems = [
-      "Roti with Vegetable Curry",
-      "Roti with Chicken Curry",
-      "Rice with Dal",
-      "Noodles",
-      "Fried Rice",
+      { name: "Roti with Vegetable Curry", description: "Soft roti with mixed vegetables" },
+      { name: "Roti with Chicken Curry", description: "Roti with chicken curry" },
+      { name: "Rice with Dal", description: "Rice with lentil soup" },
+      { name: "Noodles", description: "Stir-fried noodles" },
+      { name: "Fried Rice", description: "Fried rice with vegetables" },
     ];
+
+    const adminUser = createdUsers.find((u) => u.role === "admin");
 
     for (let day = 0; day < 30; day++) {
       const date = new Date();
       date.setDate(date.getDate() + day);
+      date.setHours(0, 0, 0, 0);
 
       mealTypes.forEach((mealType) => {
         let items;
-        if (mealType === "Breakfast") items = breakfastItems;
-        else if (mealType === "Lunch") items = lunchItems;
+        if (mealType === "breakfast") items = breakfastItems;
+        else if (mealType === "lunch") items = lunchItems;
         else items = dinnerItems;
 
         menus.push({
           date: date,
           mealType: mealType,
           items: items.slice(0, 3),
-          description: `${mealType} menu for ${date.toDateString()}`,
-          cutoffTime: new Date(date.getTime() - 2 * 60 * 60 * 1000),
+          createdBy: adminUser._id,
         });
       });
     }
