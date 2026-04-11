@@ -75,7 +75,7 @@ const BillingManage = () => {
 
   const calculateTotals = () => {
     const total = bills.reduce((sum, bill) => sum + bill.totalAmount, 0);
-    const paid = bills.filter((b) => b.status === "paid").length;
+    const paid = bills.filter((b) => b.status === "PAID").length;
     const unpaid = bills.length - paid;
     return { total, paid, unpaid };
   };
@@ -111,9 +111,9 @@ const BillingManage = () => {
       width: 120,
       renderCell: (params) => (
         <Chip
-          label={params.value === "paid" ? "Paid" : "Pending"}
+          label={params.value === "PAID" ? "Paid" : "Due"}
           size="small"
-          color={params.value === "paid" ? "success" : "warning"}
+          color={params.value === "PAID" ? "success" : "warning"}
         />
       ),
     },
@@ -188,7 +188,7 @@ const BillingManage = () => {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Alert severity="info" sx={{ mb: 2 }}>
-                Each student will be charged ৳6,000 per month (৳2,000 for each meal type)
+                Bills are generated automatically: ৳2,000 fixed hostel fee + meal costs based on actual meal selections
               </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>

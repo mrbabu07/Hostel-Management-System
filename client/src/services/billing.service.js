@@ -10,5 +10,9 @@ export const billingService = {
     return api.get(url);
   },
   generateBills: (month, year) =>
-    api.post(`/billing/generate?month=${month}&year=${year}`),
+    api.post("/billing/generate", { month, year }),
+  updateBillStatus: (billId, status) =>
+    api.put(`/billing/${billId}`, { status }),
+  getStudentBills: (studentId) =>
+    api.get(`/billing/student/${studentId}`),
 };
