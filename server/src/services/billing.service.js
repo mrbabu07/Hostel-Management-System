@@ -253,7 +253,7 @@ class BillingService {
     }
 
     bill.status = status;
-    if (status === "paid") {
+    if (status === "PAID") {
       bill.paidAt = new Date();
       if (paymentMethod) bill.paymentMethod = paymentMethod;
       if (transactionId) bill.transactionId = transactionId;
@@ -280,8 +280,8 @@ class BillingService {
     }
 
     const totalRevenue = bills.reduce((sum, bill) => sum + bill.totalAmount, 0);
-    const paidBills = bills.filter((bill) => bill.status === "paid").length;
-    const pendingBills = bills.filter((bill) => bill.status === "pending").length;
+    const paidBills = bills.filter((bill) => bill.status === "PAID").length;
+    const pendingBills = bills.filter((bill) => bill.status === "DUE").length;
 
     return {
       totalBills: bills.length,
