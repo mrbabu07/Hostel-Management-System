@@ -3,19 +3,21 @@ const router = express.Router();
 const { protect } = require("../middleware/auth.middleware");
 const { authorize } = require("../middleware/role.middleware");
 const {
-  generateBill,
   generateBillsForMonth,
+  generateBillForStudent,
   getBillDetails,
   getStudentBillSummary,
-  getStudentBills,
   getAllBills,
+  getStudentBills,
   updateBillStatus,
+  getBillingStatistics,
 } = require("../controllers/billing.controller");
 
 // Admin routes
-router.post("/generate", protect, authorize("admin"), generateBill);
-router.post("/generate-all", protect, authorize("admin"), generateBillsForMonth);
+router.post("/generate", protect, authorize("admin"), generateBillsForMonth);
+router.post("/generate-single", protect, authorize("admin"), generateBillForStudent);
 router.get("/", protect, authorize("admin"), getAllBills);
+router.get("/stats/:year/:month", protect, authorize("admin"), getBillingStatistics);
 router.put("/:billId", protect, authorize("admin"), updateBillStatus);
 
 // Student routes
