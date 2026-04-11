@@ -151,14 +151,14 @@ const ModernMyBill = () => {
                         </Typography>
                         <Chip
                           icon={
-                            bill.status === "paid" ? (
+                            bill.status === "PAID" ? (
                               <CheckCircle />
                             ) : (
                               <Pending />
                             )
                           }
                           label={bill.status}
-                          color={bill.status === "paid" ? "success" : "warning"}
+                          color={bill.status === "PAID" ? "success" : "warning"}
                           sx={{ textTransform: "capitalize" }}
                         />
                       </Box>
@@ -225,7 +225,7 @@ const ModernMyBill = () => {
 
                       {/* Actions */}
                       <Box sx={{ display: "flex", gap: 1, mt: 3 }}>
-                        {bill.status === "pending" ? (
+                        {bill.status === "DUE" ? (
                           <Button
                             variant="contained"
                             fullWidth
