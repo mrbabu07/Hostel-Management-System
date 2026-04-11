@@ -17,31 +17,30 @@ const billSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    breakdown: {
-      breakfast: {
-        count: { type: Number, default: 0 },
-        rate: { type: Number, default: 30 },
-        total: { type: Number, default: 0 },
-      },
-      lunch: {
-        count: { type: Number, default: 0 },
-        rate: { type: Number, default: 50 },
-        total: { type: Number, default: 0 },
-      },
-      dinner: {
-        count: { type: Number, default: 0 },
-        rate: { type: Number, default: 50 },
-        total: { type: Number, default: 0 },
-      },
+    totalMeals: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    mealCost: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    fixedCost: {
+      type: Number,
+      default: 2000,
+      min: 0,
     },
     totalAmount: {
       type: Number,
       required: true,
+      min: 0,
     },
     status: {
       type: String,
-      enum: ["pending", "paid"],
-      default: "pending",
+      enum: ["DUE", "PAID"],
+      default: "DUE",
     },
     paidAt: {
       type: Date,
@@ -53,18 +52,39 @@ const billSchema = new mongoose.Schema(
     transactionId: {
       type: String,
     },
+    breakdown: {
+      breakfast: {
+        count: { type: Number, default: 0 },
+        rate: { type: Number, default: 0 },
+        total: { type: Number, default: 0 },
+      },
+      lunch: {
+        count: { type: Number, default: 0 },
+        rate: { type: Number, default: 0 },
+        total: { type: Number, default: 0 },
+      },
+      dinner: {
+        count: { type: Number, default: 0 },
+        rate: { type: Number, default: 0 },
+        total: { type: Number, default: 0 },
+      },
+    },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-// Compound index to ensure one bill per student per month
+// Compound unique index to ensure one bill per student per month/year
 billSchema.index({ student: 1, month: 1, year: 1 }, { unique: true });
+
+// Index for efficient queries
+billSchema.index({ student: 1, year: 1 });
+billSchema.index({ status: 1 });
+billSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("Bill", billSchema);
