@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Bill = require("../models/Bill.model");
 const MealSelection = require("../models/MealSelection.model");
 const settingsService = require("./settings.service");
@@ -32,7 +33,7 @@ class BillingService {
     const mealCounts = await MealSelection.aggregate([
       {
         $match: {
-          student: require("mongoose").Types.ObjectId(studentId),
+          student: mongoose.Types.ObjectId(studentId),
           date: { $gte: startDate, $lte: endDate },
         },
       },
