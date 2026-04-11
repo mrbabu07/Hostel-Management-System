@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -20,7 +21,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import { PersonAdd, Edit, ToggleOn, ToggleOff, Delete, Download } from "@mui/icons-material";
+import { PersonAdd, Edit, ToggleOn, ToggleOff, Delete, Download, Visibility } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
 import ModernTable from "../../components/common/ModernTable";
@@ -28,6 +29,7 @@ import { usersService } from "../../services/users.service";
 import { exportToCSV, exportFromAPI } from "../../utils/exportUtils";
 
 const UsersManage = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -212,9 +214,19 @@ const UsersManage = () => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 120,
+      width: 150,
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: 1 }}>
+          {params.row.role === "student" && (
+            <IconButton
+              size="small"
+              color="info"
+              onClick={() => navigate(`/admin/student/${params.row._id}`)}
+              title="View Profile"
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          )}
           <IconButton
             size="small"
             color="primary"

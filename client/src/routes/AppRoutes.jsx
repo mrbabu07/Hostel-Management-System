@@ -41,6 +41,7 @@ import Reports from "../pages/manager/Reports";
 // Admin Pages
 import ModernAdminDashboard from "../pages/admin/ModernAdminDashboard";
 import UsersManage from "../pages/admin/UsersManage";
+import StudentProfile from "../pages/admin/StudentProfile";
 import ComplaintsManage from "../pages/admin/ComplaintsManage";
 import NoticesManage from "../pages/admin/NoticesManage";
 import BillingManage from "../pages/admin/BillingManage";
@@ -294,6 +295,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <RoleRoute allowedRoles={["admin"]}>
               <UsersManage />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/student/:studentId"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["admin"]}>
+              <StudentProfile />
             </RoleRoute>
           </ProtectedRoute>
         }
