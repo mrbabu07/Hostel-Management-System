@@ -46,7 +46,7 @@ const ModernMyBill = () => {
   const fetchBills = async () => {
     setLoading(true);
     try {
-      const response = await billingService.getAllBills();
+      const response = await billingService.getMyBills();
       setBills(response.data.bills || []);
     } catch (error) {
       console.error("Error fetching bills:", error);

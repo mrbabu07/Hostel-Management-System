@@ -91,6 +91,17 @@ const getAllBills = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, { bills, count: bills.length }, "All bills retrieved successfully"));
 });
 
+// @desc    Get current user's bills (for students)
+// @route   GET /api/v1/billing/me
+// @access  Private (Student)
+const getMyBills = asyncHandler(async (req, res) => {
+  const studentId = req.user._id;
+
+  const bills = await billingService.getStudentBills(studentId);
+
+  res.json(new ApiResponse(200, { bills, count: bills.length }, "Your bills retrieved successfully"));
+});
+
 // @desc    Get student's all bills
 // @route   GET /api/v1/billing/student/:studentId
 // @access  Private
@@ -143,6 +154,7 @@ module.exports = {
   getBillDetails,
   getStudentBillSummary,
   getAllBills,
+  getMyBills,
   getStudentBills,
   updateBillStatus,
   getBillingStatistics,

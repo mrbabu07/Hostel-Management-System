@@ -8,10 +8,16 @@ const {
   getBillDetails,
   getStudentBillSummary,
   getAllBills,
+  getMyBills,
   getStudentBills,
   updateBillStatus,
   getBillingStatistics,
 } = require("../controllers/billing.controller");
+
+// Student routes (must come before :billId to avoid conflicts)
+router.get("/me", protect, getMyBills);
+router.get("/student/:studentId", protect, getStudentBills);
+router.get("/summary/:studentId", protect, getStudentBillSummary);
 
 // Admin routes
 router.post("/generate", protect, authorize("admin"), generateBillsForMonth);
@@ -19,10 +25,6 @@ router.post("/generate-single", protect, authorize("admin"), generateBillForStud
 router.get("/", protect, authorize("admin"), getAllBills);
 router.get("/stats/:year/:month", protect, authorize("admin"), getBillingStatistics);
 router.put("/:billId", protect, authorize("admin"), updateBillStatus);
-
-// Student routes
-router.get("/student/:studentId", protect, getStudentBills);
-router.get("/summary/:studentId", protect, getStudentBillSummary);
 
 // General routes
 router.get("/:billId", protect, getBillDetails);
