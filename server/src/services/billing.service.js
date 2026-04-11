@@ -84,11 +84,11 @@ class BillingService {
       // Calculate per-meal cost
       const perMealCost = this.calculatePerMealCost(year, month, monthlyMealBudget);
 
-      // Calculate meal costs
-      const breakfastTotal = mealCounts.breakfastCount * perMealCost;
-      const lunchTotal = mealCounts.lunchCount * perMealCost;
-      const dinnerTotal = mealCounts.dinnerCount * perMealCost;
-      const totalMealCost = mealCounts.totalMeals * perMealCost;
+      // Calculate meal costs (rounded to nearest integer)
+      const breakfastTotal = Math.round(mealCounts.breakfastCount * perMealCost);
+      const lunchTotal = Math.round(mealCounts.lunchCount * perMealCost);
+      const dinnerTotal = Math.round(mealCounts.dinnerCount * perMealCost);
+      const totalMealCost = Math.round(mealCounts.totalMeals * perMealCost);
 
       // Calculate total bill
       const totalAmount = fixedCost + totalMealCost;
@@ -104,17 +104,17 @@ class BillingService {
           breakdown: {
             breakfast: {
               count: mealCounts.breakfastCount,
-              rate: perMealCost,
+              rate: Math.round(perMealCost),
               total: breakfastTotal,
             },
             lunch: {
               count: mealCounts.lunchCount,
-              rate: perMealCost,
+              rate: Math.round(perMealCost),
               total: lunchTotal,
             },
             dinner: {
               count: mealCounts.dinnerCount,
-              rate: perMealCost,
+              rate: Math.round(perMealCost),
               total: dinnerTotal,
             },
           },
