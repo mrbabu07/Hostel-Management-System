@@ -100,6 +100,7 @@ class BillingService {
           student: studentId,
           month,
           year,
+          totalMeals: mealCounts.totalMeals,
           breakdown: {
             breakfast: {
               count: mealCounts.breakfastCount,
