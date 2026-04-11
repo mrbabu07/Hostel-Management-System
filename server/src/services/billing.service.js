@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Bill = require("../models/Bill.model");
 const MealSelection = require("../models/MealSelection.model");
+const User = require("../models/User.model");
 const settingsService = require("./settings.service");
 const ApiError = require("../utils/ApiError");
 
@@ -8,10 +9,7 @@ class BillingService {
   /**
    * Calculate per-meal cost based on monthly budget
    */
-  async calculatePerMealCost(year, month) {
-    const settings = await settingsService.getSettings();
-    const monthlyMealBudget = settings?.monthlyMealBudget || 4000; // Default 4000 BDT
-
+  calculatePerMealCost(year, month, monthlyMealBudget = 4000) {
     // Get number of days in month
     const daysInMonth = new Date(year, month, 0).getDate();
     const totalMealsInMonth = daysInMonth * 3; // 3 meals per day
@@ -21,7 +19,7 @@ class BillingService {
   }
 
   /**
-   * Get meal counts for a student in a month
+   * Get meal counts for a student in a month using aggregation
    */
   async getMealCountsForMonth(studentId, year, month) {
     const startDate = new Date(year, month - 1, 1);
@@ -71,80 +69,117 @@ class BillingService {
   }
 
   /**
-   * Generate bill for a student for a month
+   * Generate bill for a single student for a month
    */
-  async generateBill(studentId, year, month, generatedBy) {
-    const settings = await settingsService.getSettings();
-    const fixedCost = settings?.fixedHostelFee || 2000; // Default 2000 BDT
+  async generateBillForStudent(studentId, year, month, generatedBy) {
+    try {
+      // Get settings
+      const settings = await settingsService.getSettings();
+      const fixedCost = settings?.fixedHostelFee || 2000;
+      const monthlyMealBudget = settings?.monthlyMealBudget || 4000;
 
-    // Get meal counts
-    const mealCounts = await this.getMealCountsForMonth(studentId, year, month);
+      // Get meal counts for the student
+      const mealCounts = await this.getMealCountsForMonth(studentId, year, month);
 
-    // Calculate per-meal cost
-    const perMealCost = await this.calculatePerMealCost(year, month);
+      // Calculate per-meal cost
+      const perMealCost = this.calculatePerMealCost(year, month, monthlyMealBudget);
 
-    // Calculate meal costs
-    const breakfastTotal = mealCounts.breakfastCount * perMealCost;
-    const lunchTotal = mealCounts.lunchCount * perMealCost;
-    const dinnerTotal = mealCounts.dinnerCount * perMealCost;
-    const totalMealCost = mealCounts.totalMeals * perMealCost;
+      // Calculate meal costs
+      const breakfastTotal = mealCounts.breakfastCount * perMealCost;
+      const lunchTotal = mealCounts.lunchCount * perMealCost;
+      const dinnerTotal = mealCounts.dinnerCount * perMealCost;
+      const totalMealCost = mealCounts.totalMeals * perMealCost;
 
-    // Calculate total bill
-    const totalAmount = fixedCost + totalMealCost;
+      // Calculate total bill
+      const totalAmount = fixedCost + totalMealCost;
 
-    // Create or update bill
-    const bill = await Bill.findOneAndUpdate(
-      { student: studentId, month, year },
-      {
-        student: studentId,
-        month,
-        year,
-        breakdown: {
-          breakfast: {
-            count: mealCounts.breakfastCount,
-            rate: perMealCost,
-            total: breakfastTotal,
+      // Create or update bill
+      const bill = await Bill.findOneAndUpdate(
+        { student: studentId, month, year },
+        {
+          student: studentId,
+          month,
+          year,
+          breakdown: {
+            breakfast: {
+              count: mealCounts.breakfastCount,
+              rate: perMealCost,
+              total: breakfastTotal,
+            },
+            lunch: {
+              count: mealCounts.lunchCount,
+              rate: perMealCost,
+              total: lunchTotal,
+            },
+            dinner: {
+              count: mealCounts.dinnerCount,
+              rate: perMealCost,
+              total: dinnerTotal,
+            },
           },
-          lunch: {
-            count: mealCounts.lunchCount,
-            rate: perMealCost,
-            total: lunchTotal,
-          },
-          dinner: {
-            count: mealCounts.dinnerCount,
-            rate: perMealCost,
-            total: dinnerTotal,
-          },
+          totalAmount,
+          fixedCost,
+          mealCost: totalMealCost,
+          generatedBy,
         },
-        totalAmount,
-        generatedBy,
-      },
-      { upsert: true, new: true }
-    );
+        { upsert: true, new: true }
+      );
 
-    return bill;
+      return bill;
+    } catch (error) {
+      console.error(`Error generating bill for student ${studentId}:`, error);
+      throw error;
+    }
   }
 
   /**
-   * Generate bills for all students for a month
+   * Generate bills for all students for a month using optimized aggregation
    */
   async generateBillsForMonth(year, month, generatedBy) {
-    const User = require("../models/User.model");
+    try {
+      // Get all students
+      const students = await User.find({ role: "student" }).select("_id");
 
-    // Get all students
-    const students = await User.find({ role: "student" });
+      if (students.length === 0) {
+        return { bills: [], count: 0, message: "No students found" };
+      }
 
-    const bills = [];
-    for (const student of students) {
-      const bill = await this.generateBill(student._id, year, month, generatedBy);
-      bills.push(bill);
+      console.log(`Generating bills for ${students.length} students for ${month}/${year}`);
+
+      const bills = [];
+      const errors = [];
+
+      // Generate bill for each student
+      for (const student of students) {
+        try {
+          const bill = await this.generateBillForStudent(student._id, year, month, generatedBy);
+          bills.push(bill);
+        } catch (error) {
+          errors.push({
+            studentId: student._id,
+            error: error.message,
+          });
+        }
+      }
+
+      if (errors.length > 0) {
+        console.warn(`Errors generating bills for ${errors.length} students:`, errors);
+      }
+
+      return {
+        bills,
+        count: bills.length,
+        errors: errors.length > 0 ? errors : null,
+        message: `Successfully generated ${bills.length} bills${errors.length > 0 ? ` (${errors.length} errors)` : ""}`,
+      };
+    } catch (error) {
+      console.error("Error generating bills for month:", error);
+      throw error;
     }
-
-    return bills;
   }
 
   /**
-   * Get bill with fixed cost and meal cost breakdown
+   * Get bill details with breakdown
    */
   async getBillDetails(billId) {
     const bill = await Bill.findById(billId).populate("student", "name email rollNumber");
@@ -153,14 +188,7 @@ class BillingService {
       throw new ApiError(404, "Bill not found");
     }
 
-    const settings = await settingsService.getSettings();
-    const fixedCost = settings?.fixedHostelFee || 2000;
-
-    return {
-      ...bill.toObject(),
-      fixedCost,
-      mealCost: bill.totalAmount - fixedCost,
-    };
+    return bill;
   }
 
   /**
@@ -173,18 +201,93 @@ class BillingService {
       throw new ApiError(404, "Bill not found for this month");
     }
 
-    const settings = await settingsService.getSettings();
-    const fixedCost = settings?.fixedHostelFee || 2000;
-
     return {
       month,
       year,
-      fixedCost,
-      mealCost: bill.totalAmount - fixedCost,
+      fixedCost: bill.fixedCost,
+      mealCost: bill.mealCost,
       totalAmount: bill.totalAmount,
       breakdown: bill.breakdown,
       status: bill.status,
       paidAt: bill.paidAt,
+    };
+  }
+
+  /**
+   * Get all bills with filters
+   */
+  async getAllBills(filters = {}) {
+    const query = {};
+
+    if (filters.status) query.status = filters.status;
+    if (filters.year) query.year = parseInt(filters.year);
+    if (filters.month) query.month = parseInt(filters.month);
+
+    const bills = await Bill.find(query)
+      .populate("student", "name email rollNumber")
+      .sort({ year: -1, month: -1 });
+
+    return bills;
+  }
+
+  /**
+   * Get student's all bills
+   */
+  async getStudentBills(studentId) {
+    const bills = await Bill.find({ student: studentId })
+      .populate("student", "name email rollNumber")
+      .sort({ year: -1, month: -1 });
+
+    return bills;
+  }
+
+  /**
+   * Update bill status
+   */
+  async updateBillStatus(billId, status, paymentMethod = null, transactionId = null) {
+    const bill = await Bill.findById(billId);
+
+    if (!bill) {
+      throw new ApiError(404, "Bill not found");
+    }
+
+    bill.status = status;
+    if (status === "paid") {
+      bill.paidAt = new Date();
+      if (paymentMethod) bill.paymentMethod = paymentMethod;
+      if (transactionId) bill.transactionId = transactionId;
+    }
+
+    await bill.save();
+    return bill;
+  }
+
+  /**
+   * Get billing statistics for a month
+   */
+  async getBillingStatistics(year, month) {
+    const bills = await Bill.find({ year, month });
+
+    if (bills.length === 0) {
+      return {
+        totalBills: 0,
+        totalRevenue: 0,
+        paidBills: 0,
+        pendingBills: 0,
+        averageBill: 0,
+      };
+    }
+
+    const totalRevenue = bills.reduce((sum, bill) => sum + bill.totalAmount, 0);
+    const paidBills = bills.filter((bill) => bill.status === "paid").length;
+    const pendingBills = bills.filter((bill) => bill.status === "pending").length;
+
+    return {
+      totalBills: bills.length,
+      totalRevenue,
+      paidBills,
+      pendingBills,
+      averageBill: totalRevenue / bills.length,
     };
   }
 }
