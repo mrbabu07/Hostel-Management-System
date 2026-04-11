@@ -31,7 +31,7 @@ class BillingService {
     const mealCounts = await MealSelection.aggregate([
       {
         $match: {
-          student: mongoose.Types.ObjectId(studentId),
+          student: new mongoose.Types.ObjectId(studentId),
           date: { $gte: startDate, $lte: endDate },
         },
       },
