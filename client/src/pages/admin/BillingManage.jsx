@@ -13,6 +13,11 @@ import {
   Chip,
   Alert,
   IconButton,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   Receipt,
@@ -20,6 +25,7 @@ import {
   CheckCircle,
   Schedule,
   Visibility,
+  ArrowPathIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
@@ -28,6 +34,7 @@ import StatsCard from "../../components/common/StatsCard";
 import { billingService } from "../../services/billing.service";
 import ModernLoader from "../../components/common/ModernLoader";
 import EmptyState from "../../components/common/EmptyState";
+import toast from "react-hot-toast";
 
 const BillingManage = () => {
   const navigate = useNavigate();
@@ -36,6 +43,8 @@ const BillingManage = () => {
   const [year, setYear] = useState(currentDate.getFullYear());
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [regeneratingAll, setRegeneratingAll] = useState(false);
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
 
   useEffect(() => {
     fetchBills();
@@ -52,6 +61,21 @@ const BillingManage = () => {
       setBills([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRegenerateAllBills = async () => {
+    setRegeneratingAll(true);
+    try {
+      const response = await billingService.regenerateBills(month, year);
+      toast.success(`Regenerated ${response.data.count} bills successfully!`);
+      setShowRegenerateDialog(false);
+      await fetchBills();
+    } catch (error) {
+      console.error("Error regenerating bills:", error);
+      toast.error(error.response?.data?.message || "Failed to regenerate bills");
+    } finally {
+      setRegeneratingAll(false);
     }
   };
 
@@ -174,13 +198,34 @@ const BillingManage = () => {
             }}
           >
             <CardContent sx={{ py: 3 }}>
-              <Box>
-                <Typography variant="h4" fontWeight={700} gutterBottom>
-                  Billing Management 💰
-                </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                  View and manage student bills (auto-generated monthly)
-                </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Box>
+                  <Typography variant="h4" fontWeight={700} gutterBottom>
+                    Billing Management 💰
+                  </Typography>
+                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                    View and manage student bills (auto-generated monthly)
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  onClick={() => setShowRegenerateDialog(true)}
+                  disabled={regeneratingAll}
+                  sx={{
+                    bgcolor: "white",
+                    color: "primary.main",
+                    "&:hover": { bgcolor: "grey.100" },
+                  }}
+                  startIcon={<ArrowPathIcon />}
+                >
+                  {regeneratingAll ? "Regenerating..." : "Regenerate Bills"}
+                </Button>
               </Box>
             </CardContent>
           </Card>
@@ -300,6 +345,34 @@ const BillingManage = () => {
             <ModernTable columns={columns} rows={rows} />
           )}
         </motion.div>
+
+        {/* Regenerate Dialog */}
+        <Dialog
+          open={showRegenerateDialog}
+          onClose={() => setShowRegenerateDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Regenerate Bills</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              This will recalculate all bills for {getMonthName(month)} {year} using the current meal prices.
+            </Typography>
+            <Alert severity="info">
+              Use this after changing meal prices in Settings to update all student bills.
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowRegenerateDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleRegenerateAllBills}
+              variant="contained"
+              disabled={regeneratingAll}
+            >
+              {regeneratingAll ? "Regenerating..." : "Regenerate"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </ModernLayout>
   );
