@@ -11,6 +11,8 @@ export const billingService = {
   },
   generateBills: (month, year) =>
     api.post("/billing/generate", { month, year }),
+  seedBills: (month, year) =>
+    api.post("/billing/seed", { month, year }),
   deleteAllAndGenerateBills: (month, year) =>
     api.post("/billing/delete-all-and-generate", { month, year }),
   resetAndGenerateBills: (month, year) =>

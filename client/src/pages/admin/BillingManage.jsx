@@ -48,6 +48,12 @@ const BillingManage = () => {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showFixDialog, setShowFixDialog] = useState(false);
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const [showSeedDialog, setShowSeedDialog] = useState(false);
+  const [formData, setFormData] = useState({
+    breakfastPrice: 30,
+    lunchPrice: 50,
+    dinnerPrice: 40,
+  });
 
   useEffect(() => {
     fetchBills();
@@ -122,6 +128,21 @@ const BillingManage = () => {
     } catch (error) {
       console.error("Error deleting and generating bills:", error);
       toast.error(error.response?.data?.message || "Failed to delete and generate bills");
+    } finally {
+      setRegeneratingAll(false);
+    }
+  };
+
+  const handleSeedBills = async () => {
+    setRegeneratingAll(true);
+    try {
+      const response = await billingService.seedBills(month, year);
+      toast.success(`Seeded ${response.data.count} bills successfully!`);
+      setShowSeedDialog(false);
+      await fetchBills();
+    } catch (error) {
+      console.error("Error seeding bills:", error);
+      toast.error(error.response?.data?.message || "Failed to seed bills");
     } finally {
       setRegeneratingAll(false);
     }
@@ -262,6 +283,19 @@ const BillingManage = () => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowSeedDialog(true)}
+                    disabled={regeneratingAll}
+                    sx={{
+                      bgcolor: "#10b981",
+                      color: "white",
+                      "&:hover": { bgcolor: "#059669" },
+                    }}
+                    startIcon={<Refresh />}
+                  >
+                    {regeneratingAll ? "Processing..." : "Seed Bills"}
+                  </Button>
                   <Button
                     variant="contained"
                     onClick={() => setShowDeleteAllDialog(true)}
@@ -434,6 +468,39 @@ const BillingManage = () => {
             <ModernTable columns={columns} rows={rows} />
           )}
         </motion.div>
+
+        {/* Seed Bills Dialog */}
+        <Dialog
+          open={showSeedDialog}
+          onClose={() => setShowSeedDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Seed Bills</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              This will generate fresh bills for {getMonthName(month)} {year} using:
+            </Typography>
+            <Alert severity="success" sx={{ mb: 2 }}>
+              ✓ Fixed Cost: ৳2,000<br/>
+              ✓ Meal Cost: (breakfast × ৳{formData?.breakfastPrice || 30}) + (lunch × ৳{formData?.lunchPrice || 50}) + (dinner × ৳{formData?.dinnerPrice || 40})
+            </Alert>
+            <Typography variant="body2">
+              Each student's bill = ৳2,000 + meal cost
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowSeedDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleSeedBills}
+              variant="contained"
+              color="success"
+              disabled={regeneratingAll}
+            >
+              {regeneratingAll ? "Seeding..." : "Seed Bills"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Delete All and Generate Dialog */}
         <Dialog
