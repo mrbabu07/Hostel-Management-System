@@ -31,6 +31,23 @@ const generateBillsForMonth = asyncHandler(async (req, res) => {
   );
 });
 
+// @desc    Fix all bills by recalculating totalMeals
+// @route   POST /api/v1/billing/fix-all
+// @access  Private (Admin)
+const fixAllBills = asyncHandler(async (req, res) => {
+  console.log(`Admin ${req.user._id} fixing all bills`);
+
+  const result = await billingService.fixAllBills();
+
+  res.json(
+    new ApiResponse(
+      200,
+      result,
+      `Fixed ${result.fixedCount} bills successfully`
+    )
+  );
+});
+
 // @desc    Delete all bills and regenerate for a month
 // @route   POST /api/v1/billing/reset-and-generate
 // @access  Private (Admin)
@@ -212,6 +229,7 @@ module.exports = {
   generateBillsForMonth,
   resetAndGenerateBills,
   regenerateBillsForMonth,
+  fixAllBills,
   generateBillForStudent,
   getBillDetails,
   getStudentBillSummary,

@@ -27,6 +27,37 @@ class BillingService {
   }
 
   /**
+   * Fix all bills by recalculating totalMeals from breakdown
+   */
+  async fixAllBills() {
+    try {
+      const bills = await Bill.find({});
+      let fixedCount = 0;
+
+      for (const bill of bills) {
+        if (bill.breakdown) {
+          const totalMeals = 
+            (bill.breakdown.breakfast?.count || 0) +
+            (bill.breakdown.lunch?.count || 0) +
+            (bill.breakdown.dinner?.count || 0);
+
+          if (bill.totalMeals !== totalMeals) {
+            bill.totalMeals = totalMeals;
+            await bill.save();
+            fixedCount++;
+          }
+        }
+      }
+
+      console.log(`Fixed ${fixedCount} bills with correct totalMeals`);
+      return { fixedCount, message: `Fixed ${fixedCount} bills` };
+    } catch (error) {
+      console.error("Error fixing bills:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete all bills for a specific month
    */
   async deleteBillsForMonth(year, month) {

@@ -46,6 +46,7 @@ const BillingManage = () => {
   const [regeneratingAll, setRegeneratingAll] = useState(false);
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showFixDialog, setShowFixDialog] = useState(false);
 
   useEffect(() => {
     fetchBills();
@@ -90,6 +91,21 @@ const BillingManage = () => {
     } catch (error) {
       console.error("Error resetting and generating bills:", error);
       toast.error(error.response?.data?.message || "Failed to reset and generate bills");
+    } finally {
+      setRegeneratingAll(false);
+    }
+  };
+
+  const handleFixAllBills = async () => {
+    setRegeneratingAll(true);
+    try {
+      const response = await billingService.fixAllBills();
+      toast.success(`Fixed ${response.data.fixedCount} bills successfully!`);
+      setShowFixDialog(false);
+      await fetchBills();
+    } catch (error) {
+      console.error("Error fixing bills:", error);
+      toast.error(error.response?.data?.message || "Failed to fix bills");
     } finally {
       setRegeneratingAll(false);
     }
@@ -230,6 +246,19 @@ const BillingManage = () => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowFixDialog(true)}
+                    disabled={regeneratingAll}
+                    sx={{
+                      bgcolor: "white",
+                      color: "primary.main",
+                      "&:hover": { bgcolor: "grey.100" },
+                    }}
+                    startIcon={<Refresh />}
+                  >
+                    {regeneratingAll ? "Processing..." : "Fix All Bills"}
+                  </Button>
                   <Button
                     variant="contained"
                     onClick={() => setShowResetDialog(true)}
@@ -376,6 +405,34 @@ const BillingManage = () => {
             <ModernTable columns={columns} rows={rows} />
           )}
         </motion.div>
+
+        {/* Fix All Bills Dialog */}
+        <Dialog
+          open={showFixDialog}
+          onClose={() => setShowFixDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Fix All Bills</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              This will recalculate the total meals count for all bills based on their meal breakdown.
+            </Typography>
+            <Alert severity="info">
+              Use this to fix bills where the total meals count is showing 0 but the breakdown has correct values.
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowFixDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleFixAllBills}
+              variant="contained"
+              disabled={regeneratingAll}
+            >
+              {regeneratingAll ? "Fixing..." : "Fix All Bills"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Regenerate Dialog */}
         <Dialog

@@ -6,6 +6,7 @@ const {
   generateBillsForMonth,
   resetAndGenerateBills,
   regenerateBillsForMonth,
+  fixAllBills,
   generateBillForStudent,
   getBillDetails,
   getStudentBillSummary,
@@ -25,6 +26,7 @@ router.get("/summary/:studentId", protect, getStudentBillSummary);
 router.post("/generate", protect, authorize("admin"), generateBillsForMonth);
 router.post("/reset-and-generate", protect, authorize("admin"), resetAndGenerateBills);
 router.post("/regenerate", protect, authorize("admin"), regenerateBillsForMonth);
+router.post("/fix-all", protect, authorize("admin"), fixAllBills);
 router.post("/generate-single", protect, authorize("admin"), generateBillForStudent);
 router.get("/", protect, authorize("admin"), getAllBills);
 router.get("/stats/:year/:month", protect, authorize("admin"), getBillingStatistics);

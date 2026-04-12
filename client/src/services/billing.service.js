@@ -15,6 +15,8 @@ export const billingService = {
     api.post("/billing/reset-and-generate", { month, year }),
   regenerateBills: (month, year) =>
     api.post("/billing/regenerate", { month, year }),
+  fixAllBills: () =>
+    api.post("/billing/fix-all"),
   updateBillStatus: (billId, status) =>
     api.put(`/billing/${billId}`, { status }),
   getStudentBills: (studentId) =>
