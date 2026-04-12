@@ -47,6 +47,7 @@ const BillingManage = () => {
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showFixDialog, setShowFixDialog] = useState(false);
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
   useEffect(() => {
     fetchBills();
@@ -106,6 +107,21 @@ const BillingManage = () => {
     } catch (error) {
       console.error("Error fixing bills:", error);
       toast.error(error.response?.data?.message || "Failed to fix bills");
+    } finally {
+      setRegeneratingAll(false);
+    }
+  };
+
+  const handleDeleteAllAndGenerateBills = async () => {
+    setRegeneratingAll(true);
+    try {
+      const response = await billingService.deleteAllAndGenerateBills(month, year);
+      toast.success(`Deleted ${response.data.deletedCount} bills and generated ${response.data.generatedCount} new bills!`);
+      setShowDeleteAllDialog(false);
+      await fetchBills();
+    } catch (error) {
+      console.error("Error deleting and generating bills:", error);
+      toast.error(error.response?.data?.message || "Failed to delete and generate bills");
     } finally {
       setRegeneratingAll(false);
     }
@@ -246,6 +262,19 @@ const BillingManage = () => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowDeleteAllDialog(true)}
+                    disabled={regeneratingAll}
+                    sx={{
+                      bgcolor: "#dc2626",
+                      color: "white",
+                      "&:hover": { bgcolor: "#b91c1c" },
+                    }}
+                    startIcon={<Refresh />}
+                  >
+                    {regeneratingAll ? "Processing..." : "Delete All & Generate"}
+                  </Button>
                   <Button
                     variant="contained"
                     onClick={() => setShowFixDialog(true)}
@@ -405,6 +434,35 @@ const BillingManage = () => {
             <ModernTable columns={columns} rows={rows} />
           )}
         </motion.div>
+
+        {/* Delete All and Generate Dialog */}
+        <Dialog
+          open={showDeleteAllDialog}
+          onClose={() => setShowDeleteAllDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Delete ALL Bills & Generate New</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              This will DELETE ALL bills from the entire database and create fresh bills for {getMonthName(month)} {year}.
+            </Typography>
+            <Alert severity="error">
+              ⚠️ WARNING: This action cannot be undone. ALL billing data will be permanently deleted from the database.
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleDeleteAllAndGenerateBills}
+              variant="contained"
+              color="error"
+              disabled={regeneratingAll}
+            >
+              {regeneratingAll ? "Processing..." : "Delete All & Generate"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Fix All Bills Dialog */}
         <Dialog

@@ -31,6 +31,43 @@ const generateBillsForMonth = asyncHandler(async (req, res) => {
   );
 });
 
+// @desc    Delete ALL bills and generate new ones for a month
+// @route   POST /api/v1/billing/delete-all-and-generate
+// @access  Private (Admin)
+const deleteAllAndGenerateBills = asyncHandler(async (req, res) => {
+  const { year, month } = req.body;
+
+  if (!year || !month) {
+    throw new ApiError(400, "Year and month are required");
+  }
+
+  // Validate month
+  if (month < 1 || month > 12) {
+    throw new ApiError(400, "Month must be between 1 and 12");
+  }
+
+  console.log(`Admin ${req.user._id} deleting ALL bills and generating new ones for ${month}/${year}`);
+
+  // Delete ALL bills from database
+  const deleteResult = await billingService.deleteAllBills();
+  console.log(`Deleted ${deleteResult.deletedCount} bills from database`);
+
+  // Generate new bills
+  const result = await billingService.generateBillsForMonth(year, month, req.user._id);
+
+  res.json(
+    new ApiResponse(
+      200,
+      {
+        deletedCount: deleteResult.deletedCount,
+        generatedCount: result.count,
+        ...result,
+      },
+      `Deleted ${deleteResult.deletedCount} bills and generated ${result.count} new bills`
+    )
+  );
+});
+
 // @desc    Fix all bills by recalculating totalMeals
 // @route   POST /api/v1/billing/fix-all
 // @access  Private (Admin)
@@ -227,6 +264,7 @@ const getBillingStatistics = asyncHandler(async (req, res) => {
 
 module.exports = {
   generateBillsForMonth,
+  deleteAllAndGenerateBills,
   resetAndGenerateBills,
   regenerateBillsForMonth,
   fixAllBills,

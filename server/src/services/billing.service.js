@@ -58,6 +58,20 @@ class BillingService {
   }
 
   /**
+   * Delete ALL bills from database
+   */
+  async deleteAllBills() {
+    try {
+      const result = await Bill.deleteMany({});
+      console.log(`Deleted ${result.deletedCount} bills from database`);
+      return result;
+    } catch (error) {
+      console.error("Error deleting all bills:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete all bills for a specific month
    */
   async deleteBillsForMonth(year, month) {
