@@ -25,7 +25,7 @@ import {
   CheckCircle,
   Schedule,
   Visibility,
-  ArrowPathIcon,
+  Refresh,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
@@ -222,7 +222,7 @@ const BillingManage = () => {
                     color: "primary.main",
                     "&:hover": { bgcolor: "grey.100" },
                   }}
-                  startIcon={<ArrowPathIcon />}
+                  startIcon={<Refresh />}
                 >
                   {regeneratingAll ? "Regenerating..." : "Regenerate Bills"}
                 </Button>
