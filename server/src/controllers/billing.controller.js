@@ -31,6 +31,38 @@ const generateBillsForMonth = asyncHandler(async (req, res) => {
   );
 });
 
+// @desc    Delete all bills and regenerate for a month
+// @route   POST /api/v1/billing/reset-and-generate
+// @access  Private (Admin)
+const resetAndGenerateBills = asyncHandler(async (req, res) => {
+  const { year, month } = req.body;
+
+  if (!year || !month) {
+    throw new ApiError(400, "Year and month are required");
+  }
+
+  // Validate month
+  if (month < 1 || month > 12) {
+    throw new ApiError(400, "Month must be between 1 and 12");
+  }
+
+  console.log(`Admin ${req.user._id} resetting and generating bills for ${month}/${year}`);
+
+  // Delete all bills for this month
+  await billingService.deleteBillsForMonth(year, month);
+
+  // Generate new bills
+  const result = await billingService.generateBillsForMonth(year, month, req.user._id);
+
+  res.json(
+    new ApiResponse(
+      200,
+      result,
+      `Bills reset and generated successfully for ${result.count} students`
+    )
+  );
+});
+
 // @desc    Regenerate bills for a month (when settings change)
 // @route   POST /api/v1/billing/regenerate
 // @access  Private (Admin)
@@ -178,6 +210,7 @@ const getBillingStatistics = asyncHandler(async (req, res) => {
 
 module.exports = {
   generateBillsForMonth,
+  resetAndGenerateBills,
   regenerateBillsForMonth,
   generateBillForStudent,
   getBillDetails,

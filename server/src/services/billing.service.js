@@ -27,6 +27,20 @@ class BillingService {
   }
 
   /**
+   * Delete all bills for a specific month
+   */
+  async deleteBillsForMonth(year, month) {
+    try {
+      const result = await Bill.deleteMany({ year, month });
+      console.log(`Deleted ${result.deletedCount} bills for ${month}/${year}`);
+      return result;
+    } catch (error) {
+      console.error("Error deleting bills for month:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get meal counts for a student in a month using aggregation
    */
   async getMealCountsForMonth(studentId, year, month) {

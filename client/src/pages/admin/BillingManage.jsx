@@ -45,6 +45,7 @@ const BillingManage = () => {
   const [loading, setLoading] = useState(false);
   const [regeneratingAll, setRegeneratingAll] = useState(false);
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
 
   useEffect(() => {
     fetchBills();
@@ -74,6 +75,21 @@ const BillingManage = () => {
     } catch (error) {
       console.error("Error regenerating bills:", error);
       toast.error(error.response?.data?.message || "Failed to regenerate bills");
+    } finally {
+      setRegeneratingAll(false);
+    }
+  };
+
+  const handleResetAndGenerateBills = async () => {
+    setRegeneratingAll(true);
+    try {
+      const response = await billingService.resetAndGenerateBills(month, year);
+      toast.success(`Reset and generated ${response.data.count} bills successfully!`);
+      setShowResetDialog(false);
+      await fetchBills();
+    } catch (error) {
+      console.error("Error resetting and generating bills:", error);
+      toast.error(error.response?.data?.message || "Failed to reset and generate bills");
     } finally {
       setRegeneratingAll(false);
     }
@@ -213,19 +229,34 @@ const BillingManage = () => {
                     View and manage student bills (auto-generated monthly)
                   </Typography>
                 </Box>
-                <Button
-                  variant="contained"
-                  onClick={() => setShowRegenerateDialog(true)}
-                  disabled={regeneratingAll}
-                  sx={{
-                    bgcolor: "white",
-                    color: "primary.main",
-                    "&:hover": { bgcolor: "grey.100" },
-                  }}
-                  startIcon={<Refresh />}
-                >
-                  {regeneratingAll ? "Regenerating..." : "Regenerate Bills"}
-                </Button>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowResetDialog(true)}
+                    disabled={regeneratingAll}
+                    sx={{
+                      bgcolor: "white",
+                      color: "primary.main",
+                      "&:hover": { bgcolor: "grey.100" },
+                    }}
+                    startIcon={<Refresh />}
+                  >
+                    {regeneratingAll ? "Processing..." : "Reset & Generate"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowRegenerateDialog(true)}
+                    disabled={regeneratingAll}
+                    sx={{
+                      bgcolor: "white",
+                      color: "primary.main",
+                      "&:hover": { bgcolor: "grey.100" },
+                    }}
+                    startIcon={<Refresh />}
+                  >
+                    {regeneratingAll ? "Processing..." : "Regenerate Bills"}
+                  </Button>
+                </Box>
               </Box>
             </CardContent>
           </Card>
@@ -370,6 +401,35 @@ const BillingManage = () => {
               disabled={regeneratingAll}
             >
               {regeneratingAll ? "Regenerating..." : "Regenerate"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Reset and Generate Dialog */}
+        <Dialog
+          open={showResetDialog}
+          onClose={() => setShowResetDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Reset & Generate Bills</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              This will DELETE all existing bills for {getMonthName(month)} {year} and create fresh bills with the current meal prices.
+            </Typography>
+            <Alert severity="warning">
+              ⚠️ This action cannot be undone. All old billing data for this month will be permanently deleted.
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowResetDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleResetAndGenerateBills}
+              variant="contained"
+              color="error"
+              disabled={regeneratingAll}
+            >
+              {regeneratingAll ? "Processing..." : "Reset & Generate"}
             </Button>
           </DialogActions>
         </Dialog>
