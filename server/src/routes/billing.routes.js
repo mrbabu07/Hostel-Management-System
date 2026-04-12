@@ -4,6 +4,7 @@ const { protect } = require("../middleware/auth.middleware");
 const { authorize } = require("../middleware/role.middleware");
 const {
   generateBillsForMonth,
+  regenerateBillsForMonth,
   generateBillForStudent,
   getBillDetails,
   getStudentBillSummary,
@@ -21,6 +22,7 @@ router.get("/summary/:studentId", protect, getStudentBillSummary);
 
 // Admin routes
 router.post("/generate", protect, authorize("admin"), generateBillsForMonth);
+router.post("/regenerate", protect, authorize("admin"), regenerateBillsForMonth);
 router.post("/generate-single", protect, authorize("admin"), generateBillForStudent);
 router.get("/", protect, authorize("admin"), getAllBills);
 router.get("/stats/:year/:month", protect, authorize("admin"), getBillingStatistics);

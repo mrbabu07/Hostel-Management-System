@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
 import { settingsService } from "../../services/settings.service";
+import { billingService } from "../../services/billing.service";
 import {
   Cog6ToothIcon,
   CurrencyDollarIcon,
@@ -11,12 +12,15 @@ import {
   TrashIcon,
   PlusIcon,
   CheckCircleIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+import toast from "react-hot-toast";
 
 const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [regenerating, setRegenerating] = useState(false);
   const [formData, setFormData] = useState({
     breakfastPrice: 30,
     lunchPrice: 50,
@@ -74,6 +78,25 @@ const Settings = () => {
     }
   };
 
+  const handleRegenerateBills = async () => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+
+    if (!window.confirm(`Regenerate bills for ${month}/${year} with new meal prices?`)) return;
+
+    setRegenerating(true);
+    try {
+      const response = await billingService.regenerateBills(month, year);
+      toast.success(`Regenerated ${response.data.count} bills successfully!`);
+    } catch (error) {
+      console.error("Error regenerating bills:", error);
+      toast.error(error.response?.data?.message || "Failed to regenerate bills");
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   const handleAddHoliday = async () => {
     if (newHoliday.date && newHoliday.reason) {
       try {
@@ -127,14 +150,24 @@ const Settings = () => {
                 Configure system-wide settings and preferences
               </p>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-white/90 backdrop-blur-lg text-violet-600 px-6 py-3 rounded-xl font-bold hover:shadow-2xl transform hover:scale-110 active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center gap-2 hover:bg-white"
-            >
-              <CheckCircleIcon className="w-5 h-5" />
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleRegenerateBills}
+                disabled={regenerating}
+                className="bg-white/90 backdrop-blur-lg text-violet-600 px-6 py-3 rounded-xl font-bold hover:shadow-2xl transform hover:scale-110 active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center gap-2 hover:bg-white"
+              >
+                <ArrowPathIcon className="w-5 h-5" />
+                {regenerating ? "Regenerating..." : "Regenerate Bills"}
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-white/90 backdrop-blur-lg text-violet-600 px-6 py-3 rounded-xl font-bold hover:shadow-2xl transform hover:scale-110 active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center gap-2 hover:bg-white"
+              >
+                <CheckCircleIcon className="w-5 h-5" />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
           </div>
         </motion.div>
 

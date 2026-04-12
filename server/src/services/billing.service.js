@@ -7,15 +7,23 @@ const ApiError = require("../utils/ApiError");
 
 class BillingService {
   /**
-   * Calculate per-meal cost based on monthly budget
+   * Calculate meal costs based on individual meal prices
    */
-  calculatePerMealCost(year, month, monthlyMealBudget = 4000) {
-    // Get number of days in month
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const totalMealsInMonth = daysInMonth * 3; // 3 meals per day
+  calculateMealCosts(mealCounts, breakfastPrice, lunchPrice, dinnerPrice) {
+    const breakfastTotal = Math.round(mealCounts.breakfastCount * breakfastPrice);
+    const lunchTotal = Math.round(mealCounts.lunchCount * lunchPrice);
+    const dinnerTotal = Math.round(mealCounts.dinnerCount * dinnerPrice);
+    const totalMealCost = breakfastTotal + lunchTotal + dinnerTotal;
 
-    const perMealCost = monthlyMealBudget / totalMealsInMonth;
-    return perMealCost;
+    return {
+      breakfastTotal,
+      lunchTotal,
+      dinnerTotal,
+      totalMealCost,
+      breakfastPrice,
+      lunchPrice,
+      dinnerPrice,
+    };
   }
 
   /**
@@ -76,22 +84,23 @@ class BillingService {
       // Get settings
       const settings = await settingsService.getSettings();
       const fixedCost = settings?.fixedHostelFee || 2000;
-      const monthlyMealBudget = settings?.monthlyMealBudget || 4000;
+      const breakfastPrice = settings?.breakfastPrice || 30;
+      const lunchPrice = settings?.lunchPrice || 50;
+      const dinnerPrice = settings?.dinnerPrice || 40;
 
       // Get meal counts for the student
       const mealCounts = await this.getMealCountsForMonth(studentId, year, month);
 
-      // Calculate per-meal cost
-      const perMealCost = this.calculatePerMealCost(year, month, monthlyMealBudget);
-
-      // Calculate meal costs (rounded to nearest integer)
-      const breakfastTotal = Math.round(mealCounts.breakfastCount * perMealCost);
-      const lunchTotal = Math.round(mealCounts.lunchCount * perMealCost);
-      const dinnerTotal = Math.round(mealCounts.dinnerCount * perMealCost);
-      const totalMealCost = Math.round(mealCounts.totalMeals * perMealCost);
+      // Calculate meal costs using individual prices
+      const mealCosts = this.calculateMealCosts(
+        mealCounts,
+        breakfastPrice,
+        lunchPrice,
+        dinnerPrice
+      );
 
       // Calculate total bill
-      const totalAmount = fixedCost + totalMealCost;
+      const totalAmount = fixedCost + mealCosts.totalMealCost;
 
       // Create or update bill
       const bill = await Bill.findOneAndUpdate(
@@ -104,23 +113,23 @@ class BillingService {
           breakdown: {
             breakfast: {
               count: mealCounts.breakfastCount,
-              rate: Math.round(perMealCost),
-              total: breakfastTotal,
+              rate: breakfastPrice,
+              total: mealCosts.breakfastTotal,
             },
             lunch: {
               count: mealCounts.lunchCount,
-              rate: Math.round(perMealCost),
-              total: lunchTotal,
+              rate: lunchPrice,
+              total: mealCosts.lunchTotal,
             },
             dinner: {
               count: mealCounts.dinnerCount,
-              rate: Math.round(perMealCost),
-              total: dinnerTotal,
+              rate: dinnerPrice,
+              total: mealCosts.dinnerTotal,
             },
           },
           totalAmount,
           fixedCost,
-          mealCost: totalMealCost,
+          mealCost: mealCosts.totalMealCost,
           generatedBy,
         },
         { upsert: true, new: true }
@@ -175,6 +184,52 @@ class BillingService {
       };
     } catch (error) {
       console.error("Error generating bills for month:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Regenerate bills for all students for a specific month (when settings change)
+   */
+  async regenerateBillsForMonth(year, month, generatedBy) {
+    try {
+      // Get all students
+      const students = await User.find({ role: "student" }).select("_id");
+
+      if (students.length === 0) {
+        return { bills: [], count: 0, message: "No students found" };
+      }
+
+      console.log(`Regenerating bills for ${students.length} students for ${month}/${year}`);
+
+      const bills = [];
+      const errors = [];
+
+      // Regenerate bill for each student
+      for (const student of students) {
+        try {
+          const bill = await this.generateBillForStudent(student._id, year, month, generatedBy);
+          bills.push(bill);
+        } catch (error) {
+          errors.push({
+            studentId: student._id,
+            error: error.message,
+          });
+        }
+      }
+
+      if (errors.length > 0) {
+        console.warn(`Errors regenerating bills for ${errors.length} students:`, errors);
+      }
+
+      return {
+        bills,
+        count: bills.length,
+        errors: errors.length > 0 ? errors : null,
+        message: `Successfully regenerated ${bills.length} bills${errors.length > 0 ? ` (${errors.length} errors)` : ""}`,
+      };
+    } catch (error) {
+      console.error("Error regenerating bills for month:", error);
       throw error;
     }
   }
