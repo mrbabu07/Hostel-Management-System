@@ -343,7 +343,7 @@ const StudentProfile = () => {
                             <Grid item xs={12} sm={6} md={3}>
                               <Box sx={{ p: 1.5, backgroundColor: "rgba(168, 85, 247, 0.1)", borderRadius: 1 }}>
                                 <Typography variant="caption" color="text.secondary">
-                                  Fixed Cost
+                                  Fixed Cost (Hostel)
                                 </Typography>
                                 <Typography variant="h6" fontWeight={600}>
                                   ৳{bill.fixedCost || 0}
@@ -353,7 +353,7 @@ const StudentProfile = () => {
                             <Grid item xs={12} sm={6} md={3}>
                               <Box sx={{ p: 1.5, backgroundColor: "rgba(239, 68, 68, 0.1)", borderRadius: 1 }}>
                                 <Typography variant="caption" color="text.secondary">
-                                  Total Amount
+                                  Total Payable
                                 </Typography>
                                 <Typography variant="h6" fontWeight={600} color="error">
                                   ৳{bill.totalAmount || 0}
@@ -361,6 +361,25 @@ const StudentProfile = () => {
                               </Box>
                             </Grid>
                           </Grid>
+
+                          {/* Calculation Summary */}
+                          <Box sx={{ mt: 2, pt: 2, borderTop: "2px solid rgba(139, 92, 246, 0.2)" }}>
+                            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
+                              Bill Calculation
+                            </Typography>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, p: 1, backgroundColor: "rgba(0,0,0,0.02)", borderRadius: 0.5 }}>
+                              <Typography variant="body2">Meal Cost:</Typography>
+                              <Typography variant="body2" fontWeight={600}>৳{bill.mealCost || 0}</Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, p: 1, backgroundColor: "rgba(0,0,0,0.02)", borderRadius: 0.5 }}>
+                              <Typography variant="body2">Fixed Cost:</Typography>
+                              <Typography variant="body2" fontWeight={600}>৳{bill.fixedCost || 0}</Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", p: 1, backgroundColor: "rgba(239, 68, 68, 0.1)", borderRadius: 0.5, fontWeight: 700 }}>
+                              <Typography variant="body2" fontWeight={700}>Total Bill:</Typography>
+                              <Typography variant="body2" fontWeight={700} color="error">৳{bill.totalAmount || 0}</Typography>
+                            </Box>
+                          </Box>
 
                           {bill.breakdown && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
