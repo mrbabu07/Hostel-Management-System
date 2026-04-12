@@ -241,7 +241,7 @@ const BillingManage = () => {
                 value={totals.total}
                 icon={TrendingUp}
                 color="primary"
-                prefix="₹"
+                prefix="৳"
               />
             </motion.div>
           </Grid>
