@@ -30,6 +30,9 @@ const ModernAdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchDashboardData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -205,11 +208,20 @@ const ModernAdminDashboard = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="mb-8 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-premium-lg animate-gradient" style={{ backgroundSize: '200% 200%' }}>
-          <div className="relative z-10">
-            <h1 className="text-4xl font-bold mb-2">Admin Dashboard 👨‍💼</h1>
-            <p className="text-purple-100 text-lg">
-              Welcome back, {user?.name}! Here's your system overview.
-            </p>
+          <div className="relative z-10 flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Admin Dashboard 👨‍💼</h1>
+              <p className="text-purple-100 text-lg">
+                Welcome back, {user?.name}! Here's your system overview.
+              </p>
+            </div>
+            <button
+              onClick={fetchDashboardData}
+              disabled={loading}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-semibold transition-all duration-300 disabled:opacity-50"
+            >
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
           </div>
         </div>
       </motion.div>
