@@ -282,71 +282,109 @@ const StudentProfile = () => {
                   No bills found
                 </Typography>
               ) : (
-                <TableContainer component={Paper} sx={{ backgroundColor: "transparent" }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: "rgba(139, 92, 246, 0.1)" }}>
-                        <TableCell fontWeight={600}>Month</TableCell>
-                        <TableCell align="right" fontWeight={600}>
-                          Total Meals
-                        </TableCell>
-                        <TableCell align="right" fontWeight={600}>
-                          Meal Cost
-                        </TableCell>
-                        <TableCell align="right" fontWeight={600}>
-                          Fixed Cost
-                        </TableCell>
-                        <TableCell align="right" fontWeight={600}>
-                          Total Amount
-                        </TableCell>
-                        <TableCell align="center" fontWeight={600}>
-                          Status
-                        </TableCell>
-                        <TableCell align="center" fontWeight={600}>
-                          Action
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {bills.map((bill) => (
-                        <TableRow key={bill._id} hover>
-                          <TableCell>
-                            {new Date(2024, bill.month - 1).toLocaleString("default", {
-                              month: "long",
-                            })}{" "}
-                            {bill.year}
-                          </TableCell>
-                          <TableCell align="right">{bill.totalMeals}</TableCell>
-                          <TableCell align="right">৳{bill.mealCost}</TableCell>
-                          <TableCell align="right">৳{bill.fixedCost}</TableCell>
-                          <TableCell align="right" fontWeight={600}>
-                            ৳{bill.totalAmount}
-                          </TableCell>
-                          <TableCell align="center">
-                            <Chip
-                              icon={
-                                bill.status === "PAID" ? <CheckCircle /> : <Pending />
-                              }
-                              label={bill.status}
-                              color={bill.status === "PAID" ? "success" : "warning"}
-                              size="small"
-                            />
-                          </TableCell>
-                          <TableCell align="center">
-                            <Button
-                              size="small"
-                              startIcon={<Edit />}
-                              onClick={() => handleUpdateBillStatus(bill)}
-                              variant="outlined"
-                            >
-                              Update
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <Box>
+                  {bills.map((bill, index) => (
+                    <motion.div
+                      key={bill._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card sx={{ mb: 2, backgroundColor: "rgba(139, 92, 246, 0.05)" }}>
+                        <CardContent>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                            <Typography variant="h6" fontWeight={600}>
+                              {new Date(2024, bill.month - 1).toLocaleString("default", {
+                                month: "long",
+                              })}{" "}
+                              {bill.year}
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                              <Chip
+                                icon={
+                                  bill.status === "PAID" ? <CheckCircle /> : <Pending />
+                                }
+                                label={bill.status}
+                                color={bill.status === "PAID" ? "success" : "warning"}
+                                size="small"
+                              />
+                              <Button
+                                size="small"
+                                startIcon={<Edit />}
+                                onClick={() => handleUpdateBillStatus(bill)}
+                                variant="outlined"
+                              >
+                                Update
+                              </Button>
+                            </Box>
+                          </Box>
+
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6} md={3}>
+                              <Box sx={{ p: 1.5, backgroundColor: "rgba(59, 130, 246, 0.1)", borderRadius: 1 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Total Meals
+                                </Typography>
+                                <Typography variant="h6" fontWeight={600}>
+                                  {bill.totalMeals || 0}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                              <Box sx={{ p: 1.5, backgroundColor: "rgba(34, 197, 94, 0.1)", borderRadius: 1 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Meal Cost
+                                </Typography>
+                                <Typography variant="h6" fontWeight={600}>
+                                  ৳{bill.mealCost || 0}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                              <Box sx={{ p: 1.5, backgroundColor: "rgba(168, 85, 247, 0.1)", borderRadius: 1 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Fixed Cost
+                                </Typography>
+                                <Typography variant="h6" fontWeight={600}>
+                                  ৳{bill.fixedCost || 0}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                              <Box sx={{ p: 1.5, backgroundColor: "rgba(239, 68, 68, 0.1)", borderRadius: 1 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Total Amount
+                                </Typography>
+                                <Typography variant="h6" fontWeight={600} color="error">
+                                  ৳{bill.totalAmount || 0}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                          </Grid>
+
+                          {bill.breakdown && (
+                            <Box sx={{ mt: 2, pt: 2, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                              <Typography variant="caption" fontWeight={600} color="text.secondary">
+                                Meal Breakdown
+                              </Typography>
+                              <Grid container spacing={1} sx={{ mt: 0.5 }}>
+                                {Object.entries(bill.breakdown).map(([mealType, data]) => (
+                                  <Grid item xs={12} sm={6} md={4} key={mealType}>
+                                    <Box sx={{ p: 1, backgroundColor: "rgba(0,0,0,0.02)", borderRadius: 0.5 }}>
+                                      <Typography variant="caption" sx={{ textTransform: "capitalize" }}>
+                                        {mealType}: {data.count} meals × ৳{data.rate} = ৳{data.total}
+                                      </Typography>
+                                    </Box>
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </Box>
               )}
             </CardContent>
           </Card>
