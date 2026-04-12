@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Button,
   Select,
   MenuItem,
   FormControl,
@@ -12,12 +12,14 @@ import {
   Grid,
   Chip,
   Alert,
+  IconButton,
 } from "@mui/material";
 import {
   Receipt,
   TrendingUp,
   CheckCircle,
   Schedule,
+  Visibility,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ModernLayout from "../../components/layout/ModernLayout";
@@ -26,15 +28,14 @@ import StatsCard from "../../components/common/StatsCard";
 import { billingService } from "../../services/billing.service";
 import ModernLoader from "../../components/common/ModernLoader";
 import EmptyState from "../../components/common/EmptyState";
-import toast from "react-hot-toast";
 
 const BillingManage = () => {
+  const navigate = useNavigate();
   const currentDate = new Date();
   const [month, setMonth] = useState(currentDate.getMonth() + 1);
   const [year, setYear] = useState(currentDate.getFullYear());
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     fetchBills();
@@ -54,21 +55,6 @@ const BillingManage = () => {
     }
   };
 
-  const handleGenerateBills = async () => {
-    if (!window.confirm(`Generate bills of ৳6,000 for each student for ${getMonthName(month)} ${year}?`)) return;
-    try {
-      setGenerating(true);
-      const response = await billingService.generateBills(month, year);
-      toast.success(`Generated ${response.data.count} bills successfully!`);
-      fetchBills();
-    } catch (error) {
-      console.error("Error generating bills:", error);
-      toast.error(error.response?.data?.message || "Failed to generate bills");
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   const getMonthName = (monthNum) => {
     return new Date(2024, monthNum - 1).toLocaleString("default", { month: "long" });
   };
@@ -84,7 +70,7 @@ const BillingManage = () => {
 
   const columns = [
     {
-      field: "student",
+      field: "name",
       headerName: "Student",
       flex: 1,
       renderCell: (params) => params.row.student?.name || "N/A",
@@ -94,6 +80,32 @@ const BillingManage = () => {
       headerName: "Roll Number",
       width: 130,
       renderCell: (params) => params.row.student?.rollNumber || "N/A",
+    },
+    {
+      field: "totalMeals",
+      headerName: "Meals",
+      width: 100,
+      renderCell: (params) => params.value || 0,
+    },
+    {
+      field: "mealCost",
+      headerName: "Meal Cost",
+      width: 130,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={600}>
+          ৳{params.value || 0}
+        </Typography>
+      ),
+    },
+    {
+      field: "fixedCost",
+      headerName: "Fixed Cost",
+      width: 130,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={600}>
+          ৳{params.value || 0}
+        </Typography>
+      ),
     },
     {
       field: "totalAmount",
@@ -124,6 +136,21 @@ const BillingManage = () => {
       renderCell: (params) =>
         params.value ? new Date(params.value).toLocaleDateString() : "-",
     },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          color="info"
+          onClick={() => navigate(`/admin/student/${params.row.student._id}`)}
+          title="View Student Profile"
+        >
+          <Visibility fontSize="small" />
+        </IconButton>
+      ),
+    },
   ];
 
   const rows = bills.map((bill) => ({
@@ -147,33 +174,13 @@ const BillingManage = () => {
             }}
           >
             <CardContent sx={{ py: 3 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Box>
-                  <Typography variant="h4" fontWeight={700} gutterBottom>
-                    Billing Management 💰
-                  </Typography>
-                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                    Generate and manage monthly bills
-                  </Typography>
-                </Box>
-                <Button
-                  variant="contained"
-                  onClick={handleGenerateBills}
-                  disabled={generating}
-                  sx={{
-                    bgcolor: "white",
-                    color: "primary.main",
-                    "&:hover": { bgcolor: "grey.100" },
-                  }}
-                >
-                  {generating ? "Generating..." : "Generate Bills"}
-                </Button>
+              <Box>
+                <Typography variant="h4" fontWeight={700} gutterBottom>
+                  Billing Management 💰
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                  View and manage student bills (auto-generated monthly)
+                </Typography>
               </Box>
             </CardContent>
           </Card>
@@ -188,7 +195,7 @@ const BillingManage = () => {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Alert severity="info" sx={{ mb: 2 }}>
-                Bills are generated automatically: ৳2,000 fixed hostel fee + meal costs based on actual meal selections
+                Bills are generated automatically every month: ৳2,000 fixed hostel fee + meal costs based on actual meal selections. Click on a student to view and manage their bills.
               </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
@@ -287,7 +294,7 @@ const BillingManage = () => {
             <EmptyState
               icon={Receipt}
               title="No Bills Found"
-              description="No bills found for this period. Generate bills to get started."
+              description="No bills found for this period."
             />
           ) : (
             <ModernTable columns={columns} rows={rows} />
