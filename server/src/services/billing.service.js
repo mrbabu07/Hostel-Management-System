@@ -405,6 +405,27 @@ class BillingService {
       averageBill: totalRevenue / bills.length,
     };
   }
+
+  /**
+   * Get bills with missing data (totalMeals = 0 or mealCost = 0)
+   */
+  async getBillsWithMissingData() {
+    try {
+      const bills = await Bill.find({
+        $or: [
+          { totalMeals: 0 },
+          { mealCost: 0 },
+          { totalMeals: { $exists: false } },
+          { mealCost: { $exists: false } },
+        ],
+      });
+
+      return bills;
+    } catch (error) {
+      console.error("Error getting bills with missing data:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new BillingService();

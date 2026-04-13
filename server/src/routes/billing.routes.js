@@ -17,6 +17,7 @@ const {
   getStudentBills,
   updateBillStatus,
   getBillingStatistics,
+  getBillsWithMissingData,
 } = require("../controllers/billing.controller");
 
 // Student routes (must come before :billId to avoid conflicts)
@@ -32,6 +33,7 @@ router.post("/reset-and-generate", protect, authorize("admin"), resetAndGenerate
 router.post("/regenerate", protect, authorize("admin"), regenerateBillsForMonth);
 router.post("/fix-all", protect, authorize("admin"), fixAllBills);
 router.post("/generate-single", protect, authorize("admin"), generateBillForStudent);
+router.get("/check/missing-data", protect, authorize("admin"), getBillsWithMissingData);
 router.get("/", protect, authorize("admin"), getAllBills);
 router.get("/stats/:year/:month", protect, authorize("admin"), getBillingStatistics);
 router.put("/:billId", protect, authorize("admin"), updateBillStatus);

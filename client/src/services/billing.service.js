@@ -5,8 +5,11 @@ export const billingService = {
   getMyBill: (month, year) =>
     api.get(`/billing/me?month=${month}&year=${year}`),
   getAllBills: (month, year) => {
-    let url = "/billing?";
-    if (month && year) url += `month=${month}&year=${year}`;
+    let url = "/billing";
+    const params = new URLSearchParams();
+    if (month) params.append("month", month);
+    if (year) params.append("year", year);
+    if (params.toString()) url += `?${params.toString()}`;
     return api.get(url);
   },
   generateBills: (month, year) =>
@@ -21,6 +24,8 @@ export const billingService = {
     api.post("/billing/regenerate", { month, year }),
   fixAllBills: () =>
     api.post("/billing/fix-all"),
+  getBillsWithMissingData: () =>
+    api.get("/billing/check/missing-data"),
   updateBillStatus: (billId, status) =>
     api.put(`/billing/${billId}`, { status }),
   getStudentBills: (studentId) =>

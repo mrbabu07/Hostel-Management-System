@@ -9,13 +9,13 @@ const ApiResponse = require("../utils/ApiResponse");
 // @route   POST /api/v1/payments/create-intent
 // @access  Private (Student)
 const createPaymentIntent = asyncHandler(async (req, res) => {
-  const { billId, amount } = req.body;
+  const { billId } = req.body;
 
   // Verify bill exists and belongs to user
   const bill = await Billing.findOne({
     _id: billId,
     student: req.user._id,
-    status: "pending",
+    status: "DUE",
   });
 
   if (!bill) {
@@ -23,9 +23,10 @@ const createPaymentIntent = asyncHandler(async (req, res) => {
   }
 
   // Create payment intent with Stripe
+  // Note: Stripe uses BDT (Bangladeshi Taka) for Bangladesh
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.round(bill.totalAmount * 100), // Convert to paise/cents
-    currency: "inr",
+    amount: Math.round(bill.totalAmount * 100), // Convert to smallest currency unit (poisha)
+    currency: "bdt",
     metadata: {
       billId: bill._id.toString(),
       studentId: req.user._id.toString(),
@@ -61,10 +62,10 @@ const confirmPayment = asyncHandler(async (req, res) => {
     {
       _id: billId,
       student: req.user._id,
-      status: "pending",
+      status: "DUE",
     },
     {
-      status: "paid",
+      status: "PAID",
       paidAt: new Date(),
       paymentMethod: "stripe",
       transactionId: paymentIntentId,
@@ -87,7 +88,7 @@ const confirmPayment = asyncHandler(async (req, res) => {
 const getPaymentHistory = asyncHandler(async (req, res) => {
   const payments = await Billing.find({
     student: req.user._id,
-    status: "paid",
+    status: "PAID",
   })
     .sort({ paidAt: -1 })
     .select("month year totalAmount paidAt transactionId");

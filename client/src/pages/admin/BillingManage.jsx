@@ -11,13 +11,8 @@ import {
   InputLabel,
   Grid,
   Chip,
-  Alert,
   IconButton,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import {
   Receipt,
@@ -43,17 +38,6 @@ const BillingManage = () => {
   const [year, setYear] = useState(currentDate.getFullYear());
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [regeneratingAll, setRegeneratingAll] = useState(false);
-  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
-  const [showResetDialog, setShowResetDialog] = useState(false);
-  const [showFixDialog, setShowFixDialog] = useState(false);
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
-  const [showSeedDialog, setShowSeedDialog] = useState(false);
-  const [formData, setFormData] = useState({
-    breakfastPrice: 30,
-    lunchPrice: 50,
-    dinnerPrice: 40,
-  });
 
   useEffect(() => {
     fetchBills();
@@ -62,89 +46,18 @@ const BillingManage = () => {
   const fetchBills = async () => {
     try {
       setLoading(true);
+      console.log(`Fetching bills for month: ${month}, year: ${year}`);
       const response = await billingService.getAllBills(month, year);
+      console.log("API Response:", response.data);
       const billsData = response.data.bills || [];
+      console.log(`Fetched ${billsData.length} bills`);
       setBills(billsData);
     } catch (error) {
       console.error("Error fetching bills:", error);
+      toast.error("Failed to fetch bills");
       setBills([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRegenerateAllBills = async () => {
-    setRegeneratingAll(true);
-    try {
-      const response = await billingService.regenerateBills(month, year);
-      toast.success(`Regenerated ${response.data.count} bills successfully!`);
-      setShowRegenerateDialog(false);
-      await fetchBills();
-    } catch (error) {
-      console.error("Error regenerating bills:", error);
-      toast.error(error.response?.data?.message || "Failed to regenerate bills");
-    } finally {
-      setRegeneratingAll(false);
-    }
-  };
-
-  const handleResetAndGenerateBills = async () => {
-    setRegeneratingAll(true);
-    try {
-      const response = await billingService.resetAndGenerateBills(month, year);
-      toast.success(`Reset and generated ${response.data.count} bills successfully!`);
-      setShowResetDialog(false);
-      await fetchBills();
-    } catch (error) {
-      console.error("Error resetting and generating bills:", error);
-      toast.error(error.response?.data?.message || "Failed to reset and generate bills");
-    } finally {
-      setRegeneratingAll(false);
-    }
-  };
-
-  const handleFixAllBills = async () => {
-    setRegeneratingAll(true);
-    try {
-      const response = await billingService.fixAllBills();
-      toast.success(`Fixed ${response.data.fixedCount} bills successfully!`);
-      setShowFixDialog(false);
-      await fetchBills();
-    } catch (error) {
-      console.error("Error fixing bills:", error);
-      toast.error(error.response?.data?.message || "Failed to fix bills");
-    } finally {
-      setRegeneratingAll(false);
-    }
-  };
-
-  const handleDeleteAllAndGenerateBills = async () => {
-    setRegeneratingAll(true);
-    try {
-      const response = await billingService.deleteAllAndGenerateBills(month, year);
-      toast.success(`Deleted ${response.data.deletedCount} bills and generated ${response.data.generatedCount} new bills!`);
-      setShowDeleteAllDialog(false);
-      await fetchBills();
-    } catch (error) {
-      console.error("Error deleting and generating bills:", error);
-      toast.error(error.response?.data?.message || "Failed to delete and generate bills");
-    } finally {
-      setRegeneratingAll(false);
-    }
-  };
-
-  const handleSeedBills = async () => {
-    setRegeneratingAll(true);
-    try {
-      const response = await billingService.seedBills(month, year);
-      toast.success(`Seeded ${response.data.count} bills successfully!`);
-      setShowSeedDialog(false);
-      await fetchBills();
-    } catch (error) {
-      console.error("Error seeding bills:", error);
-      toast.error(error.response?.data?.message || "Failed to seed bills");
-    } finally {
-      setRegeneratingAll(false);
     }
   };
 
@@ -279,74 +192,22 @@ const BillingManage = () => {
                     Billing Management 💰
                   </Typography>
                   <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                    View and manage student bills (auto-generated monthly)
+                    View and manage student bills
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                   <Button
-                    variant="contained"
-                    onClick={() => setShowSeedDialog(true)}
-                    disabled={regeneratingAll}
+                    variant="outlined"
+                    onClick={fetchBills}
+                    disabled={loading}
                     sx={{
-                      bgcolor: "#10b981",
                       color: "white",
-                      "&:hover": { bgcolor: "#059669" },
+                      borderColor: "white",
+                      "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
                     }}
                     startIcon={<Refresh />}
                   >
-                    {regeneratingAll ? "Processing..." : "Seed Bills"}
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => setShowDeleteAllDialog(true)}
-                    disabled={regeneratingAll}
-                    sx={{
-                      bgcolor: "#dc2626",
-                      color: "white",
-                      "&:hover": { bgcolor: "#b91c1c" },
-                    }}
-                    startIcon={<Refresh />}
-                  >
-                    {regeneratingAll ? "Processing..." : "Delete All & Generate"}
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => setShowFixDialog(true)}
-                    disabled={regeneratingAll}
-                    sx={{
-                      bgcolor: "white",
-                      color: "primary.main",
-                      "&:hover": { bgcolor: "grey.100" },
-                    }}
-                    startIcon={<Refresh />}
-                  >
-                    {regeneratingAll ? "Processing..." : "Fix All Bills"}
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => setShowResetDialog(true)}
-                    disabled={regeneratingAll}
-                    sx={{
-                      bgcolor: "white",
-                      color: "primary.main",
-                      "&:hover": { bgcolor: "grey.100" },
-                    }}
-                    startIcon={<Refresh />}
-                  >
-                    {regeneratingAll ? "Processing..." : "Reset & Generate"}
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => setShowRegenerateDialog(true)}
-                    disabled={regeneratingAll}
-                    sx={{
-                      bgcolor: "white",
-                      color: "primary.main",
-                      "&:hover": { bgcolor: "grey.100" },
-                    }}
-                    startIcon={<Refresh />}
-                  >
-                    {regeneratingAll ? "Processing..." : "Regenerate Bills"}
+                    {loading ? "Loading..." : "Refresh"}
                   </Button>
                 </Box>
               </Box>
@@ -362,9 +223,6 @@ const BillingManage = () => {
         >
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Alert severity="info" sx={{ mb: 2 }}>
-                Bills are generated automatically every month: ৳2,000 fixed hostel fee + meal costs based on actual meal selections. Click on a student to view and manage their bills.
-              </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
@@ -468,153 +326,6 @@ const BillingManage = () => {
             <ModernTable columns={columns} rows={rows} />
           )}
         </motion.div>
-
-        {/* Seed Bills Dialog */}
-        <Dialog
-          open={showSeedDialog}
-          onClose={() => setShowSeedDialog(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Seed Bills</DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              This will generate fresh bills for {getMonthName(month)} {year} using:
-            </Typography>
-            <Alert severity="success" sx={{ mb: 2 }}>
-              ✓ Fixed Cost: ৳2,000<br/>
-              ✓ Meal Cost: (breakfast × ৳{formData?.breakfastPrice || 30}) + (lunch × ৳{formData?.lunchPrice || 50}) + (dinner × ৳{formData?.dinnerPrice || 40})
-            </Alert>
-            <Typography variant="body2">
-              Each student's bill = ৳2,000 + meal cost
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowSeedDialog(false)}>Cancel</Button>
-            <Button
-              onClick={handleSeedBills}
-              variant="contained"
-              color="success"
-              disabled={regeneratingAll}
-            >
-              {regeneratingAll ? "Seeding..." : "Seed Bills"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Delete All and Generate Dialog */}
-        <Dialog
-          open={showDeleteAllDialog}
-          onClose={() => setShowDeleteAllDialog(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Delete ALL Bills & Generate New</DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              This will DELETE ALL bills from the entire database and create fresh bills for {getMonthName(month)} {year}.
-            </Typography>
-            <Alert severity="error">
-              ⚠️ WARNING: This action cannot be undone. ALL billing data will be permanently deleted from the database.
-            </Alert>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
-            <Button
-              onClick={handleDeleteAllAndGenerateBills}
-              variant="contained"
-              color="error"
-              disabled={regeneratingAll}
-            >
-              {regeneratingAll ? "Processing..." : "Delete All & Generate"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Fix All Bills Dialog */}
-        <Dialog
-          open={showFixDialog}
-          onClose={() => setShowFixDialog(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Fix All Bills</DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              This will recalculate the total meals count for all bills based on their meal breakdown.
-            </Typography>
-            <Alert severity="info">
-              Use this to fix bills where the total meals count is showing 0 but the breakdown has correct values.
-            </Alert>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowFixDialog(false)}>Cancel</Button>
-            <Button
-              onClick={handleFixAllBills}
-              variant="contained"
-              disabled={regeneratingAll}
-            >
-              {regeneratingAll ? "Fixing..." : "Fix All Bills"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Regenerate Dialog */}
-        <Dialog
-          open={showRegenerateDialog}
-          onClose={() => setShowRegenerateDialog(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Regenerate Bills</DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              This will recalculate all bills for {getMonthName(month)} {year} using the current meal prices.
-            </Typography>
-            <Alert severity="info">
-              Use this after changing meal prices in Settings to update all student bills.
-            </Alert>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowRegenerateDialog(false)}>Cancel</Button>
-            <Button
-              onClick={handleRegenerateAllBills}
-              variant="contained"
-              disabled={regeneratingAll}
-            >
-              {regeneratingAll ? "Regenerating..." : "Regenerate"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Reset and Generate Dialog */}
-        <Dialog
-          open={showResetDialog}
-          onClose={() => setShowResetDialog(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Reset & Generate Bills</DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              This will DELETE all existing bills for {getMonthName(month)} {year} and create fresh bills with the current meal prices.
-            </Typography>
-            <Alert severity="warning">
-              ⚠️ This action cannot be undone. All old billing data for this month will be permanently deleted.
-            </Alert>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowResetDialog(false)}>Cancel</Button>
-            <Button
-              onClick={handleResetAndGenerateBills}
-              variant="contained"
-              color="error"
-              disabled={regeneratingAll}
-            >
-              {regeneratingAll ? "Processing..." : "Reset & Generate"}
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Box>
     </ModernLayout>
   );

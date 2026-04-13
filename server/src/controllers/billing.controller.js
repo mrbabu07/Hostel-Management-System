@@ -225,8 +225,8 @@ const getAllBills = asyncHandler(async (req, res) => {
 
   const filters = {};
   if (status) filters.status = status;
-  if (year) filters.year = year;
-  if (month) filters.month = month;
+  if (year) filters.year = parseInt(year);
+  if (month) filters.month = parseInt(month);
 
   const bills = await billingService.getAllBills(filters);
 
@@ -290,6 +290,21 @@ const getBillingStatistics = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, { stats }, "Billing statistics retrieved successfully"));
 });
 
+// @desc    Get bills with missing data
+// @route   GET /api/v1/billing/check/missing-data
+// @access  Private (Admin)
+const getBillsWithMissingData = asyncHandler(async (req, res) => {
+  const bills = await billingService.getBillsWithMissingData();
+
+  res.json(
+    new ApiResponse(
+      200,
+      { bills, count: bills.length },
+      `Found ${bills.length} bills with missing data`
+    )
+  );
+});
+
 module.exports = {
   generateBillsForMonth,
   seedBillsForMonth,
@@ -305,4 +320,5 @@ module.exports = {
   getStudentBills,
   updateBillStatus,
   getBillingStatistics,
+  getBillsWithMissingData,
 };

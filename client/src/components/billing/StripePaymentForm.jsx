@@ -9,6 +9,7 @@ import {
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Payment } from "@mui/icons-material";
 import toast from "react-hot-toast";
+import api from "../../services/api";
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -46,31 +47,15 @@ const StripePaymentForm = ({ bill, onSuccess, onCancel }) => {
 
     try {
       // Create payment intent on backend
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/payments/create-intent`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            billId: bill._id,
-            amount: bill.totalAmount,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create payment intent");
-      }
+      const response = await api.post("/payments/create-intent", {
+        billId: bill._id,
+        amount: bill.totalAmount,
+      });
 
       // Confirm payment with Stripe
       const cardElement = elements.getElement(CardElement);
       const { error: stripeError, paymentIntent } =
-        await stripe.confirmCardPayment(data.data.clientSecret, {
+        await stripe.confirmCardPayment(response.data.clientSecret, {
           payment_method: {
             card: cardElement,
           },
@@ -81,22 +66,12 @@ const StripePaymentForm = ({ bill, onSuccess, onCancel }) => {
       }
 
       // Confirm payment on backend
-      const confirmResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/payments/confirm`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            billId: bill._id,
-            paymentIntentId: paymentIntent.id,
-          }),
-        }
-      );
+      const confirmResponse = await api.post("/payments/confirm", {
+        billId: bill._id,
+        paymentIntentId: paymentIntent.id,
+      });
 
-      if (!confirmResponse.ok) {
+      if (!confirmResponse) {
         throw new Error("Failed to confirm payment");
       }
 
@@ -104,8 +79,9 @@ const StripePaymentForm = ({ bill, onSuccess, onCancel }) => {
       onSuccess();
     } catch (err) {
       console.error("Payment error:", err);
-      setError(err.message);
-      toast.error(err.message || "Payment failed");
+      const errorMessage = err.message || err.data?.message || "Payment failed";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setProcessing(false);
     }
