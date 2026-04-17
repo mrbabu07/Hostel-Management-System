@@ -13,7 +13,6 @@ import {
 import { menuService } from '../../services/menu.service';
 import { billingService } from '../../services/billing.service';
 import { attendanceService } from '../../services/attendance.service';
-import { toISODate } from '../../utils/formatDate';
 
 const ModernStudentDashboard = () => {
   const { user } = useAuth();
@@ -33,20 +32,19 @@ const ModernStudentDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const today = toISODate(new Date());
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
 
       const [menuRes, billsRes, attendanceRes] = await Promise.all([
-        menuService.getMenus(today),
-        billingService.getAllBills(),
+        menuService.getTodayMenu(),
+        billingService.getMyBills(),
         attendanceService.getMyAttendance(),
       ]);
 
-      setTodayMenu(menuRes.data.menus || []);
+      setTodayMenu(menuRes.data.menu ? Object.values(menuRes.data.menu).filter(m => m && m._id) : []);
       
       const bills = billsRes.data.bills || [];
-      const pendingBills = bills.filter((b) => b.status === 'pending');
+      const pendingBills = bills.filter((b) => b.status === 'DUE');
       const currentMonthBill = bills.find(
         (b) => b.month === currentMonth + 1 && b.year === currentYear
       );

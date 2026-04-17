@@ -99,16 +99,15 @@ export const exportToJSON = (data, filename = "export.json") => {
 /**
  * Export to Excel (requires xlsx library)
  */
-export const exportToExcel = (data, filename = "export.xlsx") => {
-  // This requires 'xlsx' package: npm install xlsx
+export const exportToExcel = async (data, filename = "export.xlsx") => {
   try {
-    const XLSX = require("xlsx");
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(wb, filename);
   } catch (error) {
-    console.error("Excel export requires 'xlsx' package");
+    console.error("Excel export error:", error);
     alert("Excel export not available. Please use CSV instead.");
   }
 };
